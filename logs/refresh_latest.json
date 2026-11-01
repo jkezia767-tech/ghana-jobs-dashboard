@@ -1,27 +1,27 @@
 {
-  "attempted_at_utc": "2026-10-31T10:27:33.474358+00:00",
+  "attempted_at_utc": "2026-11-01T10:29:58.065225+00:00",
   "sources": [
     {
       "source": "GhanaCurrentJobs",
       "discovered": 60,
       "updated": 124,
       "failed": 0,
-      "last_success_utc": "2026-10-31T10:36:54.608423+00:00",
+      "last_success_utc": "2026-11-01T10:38:50.635199+00:00",
       "result": "Success within selected scope"
     },
     {
       "source": "JobWeb Ghana",
-      "discovered": 35,
+      "discovered": 33,
       "updated": 69,
       "failed": 0,
-      "last_success_utc": "2026-10-31T10:40:45.639643+00:00",
+      "last_success_utc": "2026-11-01T10:42:47.430434+00:00",
       "result": "Success within selected scope"
     },
     {
       "source": "BusinessGhana",
-      "discovered": 169,
-      "updated": 379,
-      "failed": 3,
+      "discovered": 160,
+      "updated": 376,
+      "failed": 7,
       "last_success_utc": "Never recorded",
       "result": "Partial"
     }
@@ -39,11 +39,31 @@
     },
     {
       "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/customer-services-assistant-jobs/460463/Secretary",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/customer-services-assistant-jobs/460463/Secretary"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/education-manager-jobs/492934/Volunteer-Head-of-Education-Creative-Programs",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/education-manager-jobs/492934/Volunteer-Head-of-Education-Creative-Programs"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/mechanical-engineer-jobs/493988/Mechanic",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/mechanical-engineer-jobs/493988/Mechanic"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/mechanical-engineer-jobs/492989/Air-Conditioning-A-C-Technician-Accra",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/mechanical-engineer-jobs/492989/Air-Conditioning-A-C-Technician-Accra"
+    },
+    {
+      "source": "BusinessGhana",
       "url": "https://www.businessghana.com/site/jobs/other-healthcare-jobs/494443/HR-Admin-Officer",
       "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/other-healthcare-jobs/494443/HR-Admin-Officer"
     }
   ],
-  "finished_at_utc": "2026-10-31T11:47:30.955630+00:00",
+  "finished_at_utc": "2026-11-01T11:53:18.937898+00:00",
   "pagination": [
     {
       "source": "GhanaCurrentJobs",
@@ -69,43 +89,43 @@
     {
       "source": "JobWeb Ghana",
       "page": 1,
-      "new_unique_links": 18,
-      "total_unique_links": 18,
+      "new_unique_links": 16,
+      "total_unique_links": 16,
       "result": "Continue"
     },
     {
       "source": "JobWeb Ghana",
       "page": 2,
       "new_unique_links": 7,
-      "total_unique_links": 25,
+      "total_unique_links": 23,
       "result": "Continue"
     },
     {
       "source": "JobWeb Ghana",
       "page": 3,
       "new_unique_links": 10,
-      "total_unique_links": 35,
+      "total_unique_links": 33,
       "result": "Page limit reached"
     },
     {
       "source": "BusinessGhana",
       "page": 1,
-      "new_unique_links": 81,
-      "total_unique_links": 81,
+      "new_unique_links": 71,
+      "total_unique_links": 71,
       "result": "Continue"
     },
     {
       "source": "BusinessGhana",
       "page": 2,
-      "new_unique_links": 40,
-      "total_unique_links": 121,
+      "new_unique_links": 42,
+      "total_unique_links": 113,
       "result": "Continue"
     },
     {
       "source": "BusinessGhana",
       "page": 3,
-      "new_unique_links": 48,
-      "total_unique_links": 169,
+      "new_unique_links": 47,
+      "total_unique_links": 160,
       "result": "Page limit reached"
     }
   ]
