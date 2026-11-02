@@ -548,7 +548,7 @@ employers cannot be reliably matched across websites.</p>
 <thead><tr>
 <th>Job title</th><th>Employer</th><th>Location</th>
 <th>Job type</th><th>Deadline</th><th>Status</th>
-<th>Source</th><th>Duplicate review</th><th>Listing</th>
+<th>Source</th><th>Page availability</th><th>Last page check UTC</th><th>Next page check UTC</th><th>Duplicate review</th><th>Listing</th>
 </tr></thead>
 <tbody id="rows"></tbody>
 </table>
@@ -699,7 +699,7 @@ function render(){
     const row = document.createElement("tr");
     for(const field of [
       "job_title","employer","location","employment_type",
-      "application_deadline","status","source"
+      "application_deadline","status","source","page_availability","last_checked_utc","next_check_utc"
     ]){
       const cell = document.createElement("td");
       cell.textContent = text(job[field]);
@@ -762,7 +762,7 @@ el("download").addEventListener("click", () => {
   const columns = [
     "job_title","employer","location","location_detail","employment_type",
     "category","industry","salary_raw","date_posted","application_deadline",
-    "status","source","job_url","collected_at_utc"
+    "status","source","job_url","collected_at_utc","page_availability","last_checked_utc","next_check_utc"
   ];
   function csvCell(value){
     let content = value == null ? "" : String(value);
@@ -1146,7 +1146,7 @@ def render_with_report(records, report, max_pages):
         page = build_dashboard(prepared, Path(tmp))
         content = page.read_text(encoding='utf-8')
         rows = ''.join('<tr>' + ''.join('<td>' + html.escape(str(row.get(k, ''))) + '</td>'
-                       for k in ('source', 'result', 'discovered', 'updated', 'failed', 'last_success_utc'))
+                       for k in ('source', 'result', 'discovered', 'updated', 'unavailable', 'deferred', 'failed', 'last_successful_download_utc'))
                        + '</tr>' for row in report['sources'])
         panel = ('<section class="panel"><h2>Collection refresh</h2><p>Last attempt (UTC): '
                  + html.escape(report['attempted_at_utc'])
@@ -1154,33 +1154,80 @@ def render_with_report(records, report, max_pages):
                  'Previously saved links are also checked. This is not complete website coverage.</p>'
                  '<p>Failed requests retain older records. No successful download means no new '
                  'verification. Counts represent listings; possible cross-site duplicates are flagged, '
-                 'not merged. Last success means all selected requests for that source completed.</p>'
+                 'not merged. Unavailable pages are rechecked after seven days. Deferred means a recheck is not due yet. Page availability does not establish whether a job is open or closed.</p>'
                  '<div class="scroll"><table><thead><tr><th>Source</th><th>Result</th>'
-                 '<th>Discovered links</th><th>Updated</th><th>Failed</th><th>Last success UTC</th>'
+                 '<th>Discovered links</th><th>Updated</th><th>Unavailable</th><th>Deferred</th><th>Failed</th><th>Last successful download UTC</th>'
                  '</tr></thead><tbody>' + rows + '</tbody></table></div></section>')
         content = content.replace('<div id="sources"></div>', panel + '<div id="sources"></div>')
         atomic_text(FOLDERS['dashboard'] / 'ghana_jobs_dashboard.html', content)
     atomic_csv(FOLDERS['data'] / 'dashboard_current.csv', prepared)
 
 
+def failure_kind(error):
+    response = getattr(error, 'response', None)
+    code = response.status_code if response is not None else None
+    if code is None:
+        match = re.search(r'\b(404|410|500|502|503|504)\b', str(error))
+        code = int(match.group(1)) if match else None
+    if code in (404, 410):
+        return 'Page unavailable — job status unverified', code
+    return 'Request failed — previous data retained', code
+
+
 def refresh(max_pages=3):
+    from datetime import timedelta
     blocked_hosts.clear(); robots_parsers.clear(); pagination_report.clear()
     records = load_records()
     saved_links = load_links()
-    previous_report_path = FOLDERS['logs'] / 'refresh_latest.json'
-    previous = json.loads(previous_report_path.read_text(encoding='utf-8')) if previous_report_path.exists() else {}
-    last_success = {r['source']: r.get('last_success_utc', 'Never recorded') for r in previous.get('sources', [])}
+    report_path = FOLDERS['logs'] / 'refresh_latest.json'
+    previous = json.loads(report_path.read_text(encoding='utf-8')) if report_path.exists() else {}
+    last_success = {r['source']: r.get('last_success_utc', 'Never recorded')
+                    for r in previous.get('sources', [])}
     report = {'attempted_at_utc': datetime.now(timezone.utc).isoformat(), 'sources': [], 'errors': []}
-    print('Existing records:', len(records), flush=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')
+    links = {(r['source'], canonical_url(r['job_url'])): r for r in saved_links.to_dict('records')}
+    for r in records.to_dict('records'):
+        links.setdefault((r['source'], r['job_url']),
+                         {'source': r['source'], 'job_url': r['job_url'], 'listing_title': r['job_title']})
+    # Carry known missing-page results from the old report into persistent URL state.
+    for error in previous.get('errors', []):
+        key = (error.get('source'), canonical_url(error.get('url', '')))
+        kind, code = failure_kind(error.get('error', ''))
+        if key in links and code in (404, 410) and pd.isna(links[key].get('next_check_utc')):
+            checked = previous.get('finished_at_utc', previous.get('attempted_at_utc'))
+            try:
+                due = datetime.fromisoformat(checked) + timedelta(days=7)
+            except (TypeError, ValueError):
+                continue
+            links[key].update(page_availability=kind, last_checked_utc=checked,
+                              next_check_utc=due.isoformat(), last_http_status=code)
+
+    def checkpoint():
+        atomic_csv(FOLDERS['data'] / 'job_links_current.csv', pd.DataFrame(links.values()))
+        if not records.empty:
+            atomic_csv(FOLDERS['data'] / 'jobs_current.csv', records)
+
+    def attach_health(key, state):
+        # Collection timestamp stays at the last successful download.
+        if records.empty:
+            return
+        mask = (records['source'] == key[0]) & (records['job_url'] == key[1])
+        for field in ('page_availability', 'last_checked_utc', 'next_check_utc'):
+            if field not in records:
+                records[field] = pd.Series(None, index=records.index, dtype='object')
+            records.loc[mask, field] = state.get(field)
+
+    print('Existing records:', len(records), flush=True)
     for source in SOURCES:
         row = {'source': source, 'discovered': 0, 'updated': 0, 'failed': 0,
+               'unavailable': 0, 'deferred': 0, 'skipped': 0,
                'last_success_utc': last_success.get(source, 'Never recorded')}
-        def record_error(url, error):
-            row['failed'] += 1
-            report['errors'].append({'source': source, 'url': url, 'error': str(error)})
-            print('  Problem:', str(error)[:180], flush=True)
         print('\nChecking', source, flush=True)
+        def record_error(url, error, unavailable=False):
+            row['unavailable' if unavailable else 'failed'] += 1
+            report['errors'].append({'source': source, 'url': url, 'error': str(error),
+                                    'kind': 'page_unavailable' if unavailable else 'request_failed'})
+            print('  Problem:', str(error)[:180], flush=True)
         try:
             read_rules(source)
             fresh = []
@@ -1189,48 +1236,70 @@ def refresh(max_pages=3):
                 row['discovered'] = len(fresh)
             except (requests.RequestException, ValueError, RuntimeError) as error:
                 record_error(SOURCES[source]['listing_url'], error)
-            if fresh:
-                saved_links = pd.concat([saved_links, pd.DataFrame(fresh)], ignore_index=True).drop_duplicates(
-                    ['source', 'job_url'], keep='last')
-                atomic_csv(FOLDERS['data'] / 'job_links_current.csv', saved_links)
-            # Refresh stored jobs even after they move off the discovery pages.
-            historical = [] if records.empty else [
-                {'source': source, 'job_url': r['job_url'], 'listing_title': r['job_title']}
-                for r in records.to_dict('records') if r['source'] == source]
-            candidates = historical + saved_links[saved_links['source'] == source].to_dict('records') + fresh
-            candidates = list({r['job_url']: r for r in candidates}.values())
+            for link in fresh:
+                key = (source, canonical_url(link['job_url']))
+                links[key] = {**links.get(key, {}), **link}
+            checkpoint()
+            candidates = [r for key, r in links.items() if key[0] == source]
             for number, link in enumerate(candidates, 1):
+                key = (source, canonical_url(link['job_url']))
+                try:
+                    due = datetime.fromisoformat(str(link.get('next_check_utc')))
+                except (ValueError, TypeError):
+                    due = None
+                if due and due.tzinfo and due > datetime.now(timezone.utc):
+                    row['deferred'] += 1
+                    attach_health(key, link)
+                    continue
                 if urlsplit(link['job_url']).netloc in blocked_hosts:
-                    record_error(link['job_url'], f'Skipped {len(candidates)-number+1} remaining requests: host paused')
+                    row['skipped'] = len(candidates) - number + 1
+                    record_error(link['job_url'], f"Skipped {row['skipped']} requests: host paused")
                     break
                 print(f"  {number}/{len(candidates)}: {str(link['listing_title'])[:65]}", flush=True)
                 try:
                     document = download_source_page(source, link['job_url'], refresh=True)
                     record = extract_job_record(link, document)
+                    record.update(page_availability='Page retrieved — open status unverified',
+                                  last_checked_utc=document['fetched_at_utc'], next_check_utc=None)
                     records = merge_records([records, pd.DataFrame([record])])
-                    # Preserve every successful result if the run is interrupted.
-                    atomic_csv(FOLDERS['data'] / 'jobs_current.csv', records)
+                    link.update(page_availability=record['page_availability'],
+                                last_checked_utc=record['last_checked_utc'], next_check_utc=None,
+                                last_http_status=200)
                     row['updated'] += 1
                 except (requests.RequestException, ValueError, RuntimeError) as error:
-                    record_error(link['job_url'], error)
+                    kind, code = failure_kind(error)
+                    checked = datetime.now(timezone.utc)
+                    link.update(page_availability=kind, last_checked_utc=checked.isoformat(),
+                                next_check_utc=(checked + timedelta(days=7)).isoformat()
+                                if code in (404, 410) else None, last_http_status=code)
+                    attach_health(key, link)
+                    record_error(link['job_url'], error, unavailable=code in (404, 410))
+                checkpoint()
+            checkpoint()
         except (requests.RequestException, ValueError, RuntimeError) as error:
-            record_error(SOURCES[source]['base_url'] + '/robots.txt', error)
-        row['result'] = ('Failed' if not row['updated'] else 'Partial' if row['failed'] else 'Success within selected scope')
-        if row['updated'] and not row['failed']:
+            record_error(SOURCES[source]['base_url'], error)
+        row['result'] = ('Partial' if row['failed'] and row['updated'] else
+                         'Failed' if row['failed'] else
+                         'Completed with unavailable/deferred pages' if row['unavailable'] or row['deferred'] else
+                         'Success within selected scope' if row['updated'] else 'No detail pages checked')
+        if row['updated'] and not (row['failed'] or row['unavailable'] or row['deferred']):
             row['last_success_utc'] = datetime.now(timezone.utc).isoformat()
+        source_records = records[records['source'] == source] if not records.empty else records
+        row['last_successful_download_utc'] = (str(source_records['collected_at_utc'].max())
+                                               if not source_records.empty else 'Never recorded')
         report['sources'].append(row)
     report['finished_at_utc'] = datetime.now(timezone.utc).isoformat()
     report['pagination'] = pagination_report
     atomic_text(FOLDERS['logs'] / f'refresh_{stamp}.json', json.dumps(report, indent=2, ensure_ascii=False))
-    atomic_text(previous_report_path, json.dumps(report, indent=2, ensure_ascii=False))
+    atomic_text(report_path, json.dumps(report, indent=2, ensure_ascii=False))
     if not records.empty:
         render_with_report(records, report, max_pages)
     print('\nREFRESH FINISHED\nStored records:', len(records))
     print(pd.DataFrame(report['sources']).to_string(index=False))
-    print('Dashboard:', FOLDERS['dashboard'] / 'ghana_jobs_dashboard.html')
-    print('Full error log:', previous_report_path)
-    print('Reload the dashboard browser tab to read the rebuilt file.')
-    return 2 if any(r['failed'] or not r['updated'] for r in report['sources']) else 0
+    print('Full error log:', report_path)
+    # A known missing page is a reported warning. Server/access/parser failures still fail the run.
+    return 2 if any(r['failed'] or not (r['updated'] or r['unavailable'] or r['deferred'])
+                    for r in report['sources']) else 0
 
 
 def main():
