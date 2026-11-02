@@ -29,11 +29,11 @@ def publish(project, report, code):
     records = jobs.load_records()
     if records.empty:
         raise ValueError('No saved records: refusing to replace the existing website.')
-    jobs.render_with_report(records, report, 3)
+    jobs.render_with_report(records, report, report.get('max_pages', 3))
     page = (jobs.FOLDERS['dashboard'] / 'ghana_jobs_dashboard.html').read_text(encoding='utf-8')
     banner = '''<section class="panel"><h2>Daily Ghana job listings</h2>
 <p>Collection is scheduled for 10:00 AM Ghana time (UTC). Starts may be delayed;
-collection usually takes about an hour. This is a daily snapshot, not an instant feed.</p>
+collection duration varies with the number of due checks. This is a daily snapshot, not an instant feed.</p>
 <p id="new-version" class="note">This page checks for a newer published version every five minutes.</p>
 </section>'''
     page = page.replace('<div id="sources"></div>', banner + '<div id="sources"></div>')
@@ -83,7 +83,7 @@ def main():
         try:
             # A bounded collector leaves time to preserve checkpoints and publish status.
             result = subprocess.run([sys.executable, '-u', str(Path(__file__).with_name('refresh_jobs.py')),
-                                     '--run', '--project-dir', str(root), '--max-pages', '3'],
+                                     '--run', '--project-dir', str(root), '--max-pages', str(jobs.DEFAULT_MAX_PAGES)],
                                     timeout=150 * 60, check=False)
             code = result.returncode
         except subprocess.TimeoutExpired:
@@ -92,6 +92,7 @@ def main():
         if code not in (0, 2) or report is None or report.get('attempted_at_utc', '') < started:
             report = fallback_report(previous, started,
                                      'Interrupted refresh; saved checkpoints retained; totals incomplete')
+            report['max_pages'] = jobs.DEFAULT_MAX_PAGES
             jobs.atomic_text(report_path, json.dumps(report, indent=2, ensure_ascii=False))
             if code == 0:
                 code = 1

@@ -1,5 +1,5 @@
 """Standalone Ghana jobs refresh, adapted from your working V2 notebook.
-Default: 3 listing pages per source; this is not exhaustive Ghana coverage.
+Default: 10 listing pages per source; this is not exhaustive Ghana coverage.
 Run --check for an offline setup check; --run performs collection.
 """
 import argparse, contextlib, html, json, os, sys, time, hashlib, tempfile
@@ -875,111 +875,68 @@ def listing_page_number(source_name, url):
 
     return int(match.group(1)) if match else None
 
-def collect_source_links(source_name, refresh=False, max_pages=3):
-    """
-    Follow actual next-page links.
-    max_pages=None removes the page cap.
-    """
-    url = SOURCES[source_name]["listing_url"]
-    visited = set()
-    unique_links = {}
-    page_count = 0
-
+def collect_source_links(source_name, refresh=False, max_pages=10, on_page=None, deadline=None):
+    """Follow real next links; retain earlier pages when a later page fails."""
+    if max_pages is None or max_pages < 1:
+        raise ValueError('A positive listing-page limit is required.')
+    url = SOURCES[source_name]['listing_url']
+    visited, unique = set(), {}
+    pages = 0
     while url:
-        url = canonical_url(url)
-
-        if url in visited:
-            raise ValueError("Pagination returned a previously visited page.")
-
-        if not source_allows_url(source_name, url):
-            raise ValueError(f"Pagination URL is excluded by rules: {url}")
-
-        document = download_source_page(
-            source_name, url, refresh=refresh
-        )
-        page = BeautifulSoup(document["text"], "html.parser")
-
-        visited.add(url)
-        page_count += 1
-        matched_on_page = 0
-        before = len(unique_links)
-
-        for anchor in page.find_all("a", href=True):
-            job_url = canonical_url(
-                urljoin(document["final_url"], anchor["href"])
-            )
-            parts = urlsplit(job_url)
-
-            if not re.match(JOB_PATH_PATTERNS[source_name], parts.path):
-                continue
-
-            if not source_allows_url(source_name, job_url):
-                continue
-
-            title = anchor.get_text(" ", strip=True)
-            if not title or title.lower() in {
-                "details", "view details", "read more"
-            }:
-                continue
-
-            matched_on_page += 1
-            unique_links.setdefault(job_url, {
-                "source": source_name,
-                "listing_title": title,
-                "job_url": job_url,
-                "links_collected_at_utc": document["fetched_at_utc"]
-            })
-
-        if matched_on_page == 0:
-            raise ValueError(f"No job links found on listing page: {url}")
-
-        current_number = listing_page_number(source_name, url)
-        next_url = None
-
-        # Follow a real link to the immediately following page.
-        for tag in page.find_all(["a", "link"], href=True):
-            candidate = canonical_url(
-                urljoin(document["final_url"], tag["href"])
-            )
-
-            if urlsplit(candidate).hostname != urlsplit(url).hostname:
-                continue
-
-            number = listing_page_number(source_name, candidate)
-
-            if current_number is not None and number == current_number + 1:
-                next_url = candidate
-                break
-
-        if next_url and not source_allows_url(source_name, next_url):
-            stop_reason = "Next page excluded by rules"
-        elif next_url and max_pages is not None and page_count >= max_pages:
-            stop_reason = "Page limit reached"
-        elif next_url:
-            stop_reason = "Continue"
-        else:
-            stop_reason = "No next-page link found"
-
-        pagination_report.append({
-            "source": source_name,
-            "page": current_number,
-            "new_unique_links": len(unique_links) - before,
-            "total_unique_links": len(unique_links),
-            "result": stop_reason
-        })
-
-        print(
-            f"{source_name}: page {current_number}, "
-            f"{len(unique_links)} unique links so far",
-            flush=True
-        )
-
-        if stop_reason != "Continue":
+        number = listing_page_number(source_name, url)
+        if deadline is not None and time.monotonic() >= deadline:
+            pagination_report.append({'source': source_name, 'page': number, 'url': url,
+                                      'result': 'Source time budget reached', 'downloaded': False})
             break
-
-        url = next_url
-
-    return list(unique_links.values())
+        try:
+            url = canonical_url(url)
+            if url in visited:
+                raise ValueError('Pagination repeated a visited URL.')
+            document = download_source_page(source_name, url, refresh=refresh)
+            final_url = canonical_url(document['final_url'])
+            if listing_page_number(source_name, final_url) != number:
+                raise ValueError('Listing redirected to a different page number; pagination needs inspection.')
+            page = BeautifulSoup(document['text'], 'html.parser')
+            found = {}
+            for anchor in page.find_all('a', href=True):
+                candidate = canonical_url(urljoin(final_url, anchor['href']))
+                if not re.match(JOB_PATH_PATTERNS[source_name], urlsplit(candidate).path): continue
+                if not source_allows_url(source_name, candidate): continue
+                title = anchor.get_text(' ', strip=True)
+                if not title or title.lower() in {'details','view details','read more'}: continue
+                found.setdefault(candidate, {'source': source_name, 'listing_title': title,
+                                  'job_url': candidate, 'links_collected_at_utc': document['fetched_at_utc']})
+            if not found:
+                raise ValueError('No job links found; listing structure needs inspection.')
+            before = len(unique)
+            unique.update(found)
+            pages += 1
+            visited.add(url)
+            if on_page: on_page(list(found.values()))
+            next_url = None
+            for tag in page.find_all(['a','link'], href=True):
+                candidate = canonical_url(urljoin(final_url, tag['href']))
+                if urlsplit(candidate).hostname != urlsplit(final_url).hostname: continue
+                if number is not None and listing_page_number(source_name, candidate) == number + 1:
+                    next_url = candidate
+                    break
+            if next_url and not source_allows_url(source_name, next_url):
+                reason = 'Next page excluded by rules'
+            elif next_url and pages >= max_pages: reason = 'Page limit reached'
+            elif next_url: reason = 'Continue'
+            else: reason = 'No next-page link found'
+            pagination_report.append({'source': source_name, 'page': number, 'url': url,
+                                      'new_unique_links': len(unique)-before, 'total_unique_links': len(unique),
+                                      'result': reason, 'downloaded': True})
+            print(f'{source_name}: page {number}, {len(unique)} unique links', flush=True)
+            if reason != 'Continue': break
+            url = next_url
+        except (requests.RequestException, ValueError, RuntimeError) as error:
+            pagination_report.append({'source': source_name, 'page': number, 'url': url,
+                                      'result': 'Listing request/structure failed', 'downloaded': False,
+                                      'error': str(error)})
+            break
+    return list(unique.values())
 
 
 def configure(project):
@@ -1139,30 +1096,6 @@ def load_links():
     return links.drop_duplicates(['source', 'job_url'], keep='last')
 
 
-def render_with_report(records, report, max_pages):
-    prepared = prepare_dashboard_data(records)
-    # Build in a temporary folder, then publish only the complete page.
-    with tempfile.TemporaryDirectory(dir=FOLDERS['dashboard']) as tmp:
-        page = build_dashboard(prepared, Path(tmp))
-        content = page.read_text(encoding='utf-8')
-        rows = ''.join('<tr>' + ''.join('<td>' + html.escape(str(row.get(k, ''))) + '</td>'
-                       for k in ('source', 'result', 'discovered', 'updated', 'unavailable', 'deferred', 'failed', 'last_successful_download_utc'))
-                       + '</tr>' for row in report['sources'])
-        panel = ('<section class="panel"><h2>Collection refresh</h2><p>Last attempt (UTC): '
-                 + html.escape(report['attempted_at_utc'])
-                 + f'. Discovery checks up to {max_pages} listing pages per source. '
-                 'Previously saved links are also checked. This is not complete website coverage.</p>'
-                 '<p>Failed requests retain older records. No successful download means no new '
-                 'verification. Counts represent listings; possible cross-site duplicates are flagged, '
-                 'not merged. Unavailable pages are rechecked after seven days. Deferred means a recheck is not due yet. Page availability does not establish whether a job is open or closed.</p>'
-                 '<div class="scroll"><table><thead><tr><th>Source</th><th>Result</th>'
-                 '<th>Discovered links</th><th>Updated</th><th>Unavailable</th><th>Deferred</th><th>Failed</th><th>Last successful download UTC</th>'
-                 '</tr></thead><tbody>' + rows + '</tbody></table></div></section>')
-        content = content.replace('<div id="sources"></div>', panel + '<div id="sources"></div>')
-        atomic_text(FOLDERS['dashboard'] / 'ghana_jobs_dashboard.html', content)
-    atomic_csv(FOLDERS['data'] / 'dashboard_current.csv', prepared)
-
-
 def failure_kind(error):
     response = getattr(error, 'response', None)
     code = response.status_code if response is not None else None
@@ -1174,33 +1107,136 @@ def failure_kind(error):
     return 'Request failed — previous data retained', code
 
 
-def refresh(max_pages=3):
+# Incremental collection settings. The cloud launcher uses these same defaults.
+DEFAULT_MAX_PAGES = 10
+MAX_DETAILS_PER_SOURCE = 200
+SOURCE_TIME_BUDGET_SECONDS = 40 * 60
+
+
+def utc_value(value):
+    try:
+        parsed = datetime.fromisoformat(str(value))
+        return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def recheck_hours(record):
+    """Deadlines determine cadence, never proof of open/closed status."""
+    if not record:
+        return 0
+    conflict = 'conflicting' in str(record.get('status', '')).lower()
+    deadline = parse_job_date(clean_optional_text(record.get('application_deadline')))
+    posted = parse_job_date(clean_optional_text(record.get('date_posted')))
+    if conflict or (deadline and posted and deadline < posted) or deadline is None:
+        return 72
+    return 168 if deadline < datetime.now(timezone.utc).date() else 20
+
+
+def plan_candidates(links, records, source, now=None, limit=MAX_DETAILS_PER_SOURCE):
+    """Return a fair, bounded queue plus items whose recheck is not due."""
+    from datetime import timedelta
+    now = now or datetime.now(timezone.utc)
+    record_map = {(r['source'], canonical_url(r['job_url'])): r for r in records.to_dict('records')}
+    fresh, existing, deferred = [], [], []
+    epoch = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    for key, link in links.items():
+        if key[0] != source:
+            continue
+        resolved = clean_optional_text(link.get('resolved_job_url'))
+        record = record_map.get((source, resolved)) if resolved else record_map.get(key)
+        record = record or record_map.get(key)
+        checked = utc_value(link.get('last_checked_utc'))
+        due = utc_value(link.get('next_check_utc'))
+        if due is None:
+            unavailable = 'unavailable' in str(link.get('page_availability', '')).lower()
+            failed = 'Request failed' in str(link.get('page_availability', ''))
+            if checked and (unavailable or failed):
+                due = checked + timedelta(hours=168 if unavailable else 20)
+            elif record:
+                collected = utc_value(record.get('collected_at_utc'))
+                if collected:
+                    due = collected + timedelta(hours=recheck_hours(record))
+        link['next_check_utc'] = due.isoformat() if due else None
+        if due and due > now:
+            deferred.append(key)
+            continue
+        if record:
+            existing.append((due or epoch, key))
+        else:
+            first_seen = utc_value(link.get('first_seen_utc')) or epoch
+            fresh.append((first_seen, key))
+    fresh.sort(); existing.sort()
+    # Alternation reserves capacity for both new discoveries and old due jobs.
+    queue = []
+    for i in range(max(len(fresh), len(existing))):
+        if i < len(fresh): queue.append(fresh[i][1])
+        if i < len(existing): queue.append(existing[i][1])
+    return queue[:limit], deferred, len(queue)
+
+
+def render_with_report(records, report, max_pages):
+    prepared = prepare_dashboard_data(records)
+    cap = report.get('max_pages', max_pages)
+    with tempfile.TemporaryDirectory(dir=FOLDERS['dashboard']) as tmp:
+        page = build_dashboard(prepared, Path(tmp))
+        content = page.read_text(encoding='utf-8')
+        fields = [('source','Source'), ('result','Result'), ('pages_checked','Pages checked'),
+                  ('discovered','Discovered links'), ('updated','Updated'), ('new_records','New records'),
+                  ('unavailable','Unavailable'), ('deferred','Not due yet'),
+                  ('queued','Waiting for next run'), ('failed','Failed'),
+                  ('last_successful_download_utc','Last successful download UTC')]
+        rows = ''.join('<tr>' + ''.join('<td>' + html.escape(str(row.get(k, '—'))) + '</td>'
+                       for k,_ in fields) + '</tr>' for row in report['sources'])
+        headings = ''.join('<th>' + label + '</th>' for _,label in fields)
+        panel = ('<section class="panel"><h2>Collection refresh</h2><p>Last attempt (UTC): '
+                 + html.escape(str(report['attempted_at_utc']))
+                 + f'. That attempt allowed up to {cap} listing pages per source. '
+                 'Only real next-page links are followed. This is not complete website coverage.</p>'
+                 '<p>Discovery now allows up to 10 pages per source. Detail checks alternate '
+                 'between new jobs and the oldest due rechecks, with up to 200 checks and a '
+                 '40-minute budget per source. Waiting links are saved for a later run.</p>'
+                 '<p>Recheck intervals: within a listed deadline, 20 hours; missing/conflicting '
+                 'deadlines, 3 days; expired deadlines or unavailable pages, 7 days; failed '
+                 'requests, 20 hours. Not due yet means no download was needed this run. '
+                 'Retained records keep their actual collection time. Page availability does '
+                 'not establish whether a job is open or closed. Possible cross-site duplicates '
+                 'are flagged, not merged.</p>'
+                 '<div class="scroll"><table><thead><tr>' + headings + '</tr></thead><tbody>'
+                 + rows + '</tbody></table></div></section>')
+        content = content.replace('<div id="sources"></div>', panel + '<div id="sources"></div>')
+        atomic_text(FOLDERS['dashboard'] / 'ghana_jobs_dashboard.html', content)
+    atomic_csv(FOLDERS['data'] / 'dashboard_current.csv', prepared)
+
+
+def refresh(max_pages=DEFAULT_MAX_PAGES):
     from datetime import timedelta
     blocked_hosts.clear(); robots_parsers.clear(); pagination_report.clear()
     records = load_records()
     saved_links = load_links()
     report_path = FOLDERS['logs'] / 'refresh_latest.json'
     previous = json.loads(report_path.read_text(encoding='utf-8')) if report_path.exists() else {}
-    last_success = {r['source']: r.get('last_success_utc', 'Never recorded')
-                    for r in previous.get('sources', [])}
-    report = {'attempted_at_utc': datetime.now(timezone.utc).isoformat(), 'sources': [], 'errors': []}
+    last_success = {r['source']: r.get('last_success_utc', 'Never recorded') for r in previous.get('sources', [])}
+    started = datetime.now(timezone.utc).isoformat()
+    report = {'attempted_at_utc': started, 'max_pages': max_pages, 'max_details_per_source': MAX_DETAILS_PER_SOURCE,
+              'source_time_budget_seconds': SOURCE_TIME_BUDGET_SECONDS, 'sources': [], 'errors': []}
     stamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')
     links = {(r['source'], canonical_url(r['job_url'])): r for r in saved_links.to_dict('records')}
     for r in records.to_dict('records'):
         links.setdefault((r['source'], r['job_url']),
                          {'source': r['source'], 'job_url': r['job_url'], 'listing_title': r['job_title']})
-    # Carry known missing-page results from the old report into persistent URL state.
+    for link in links.values():
+        if not clean_optional_text(link.get('first_seen_utc')):
+            link['first_seen_utc'] = clean_optional_text(link.get('links_collected_at_utc')) or started
+    # Preserve known unavailability if migrating from an earlier report.
     for error in previous.get('errors', []):
         key = (error.get('source'), canonical_url(error.get('url', '')))
         kind, code = failure_kind(error.get('error', ''))
-        if key in links and code in (404, 410) and pd.isna(links[key].get('next_check_utc')):
-            checked = previous.get('finished_at_utc', previous.get('attempted_at_utc'))
-            try:
-                due = datetime.fromisoformat(checked) + timedelta(days=7)
-            except (TypeError, ValueError):
-                continue
-            links[key].update(page_availability=kind, last_checked_utc=checked,
-                              next_check_utc=due.isoformat(), last_http_status=code)
+        if key in links and code in (404, 410) and not utc_value(links[key].get('next_check_utc')):
+            checked = utc_value(previous.get('finished_at_utc'))
+            if checked and not utc_value(links[key].get('last_checked_utc')):
+                links[key].update(page_availability=kind, last_checked_utc=checked.isoformat(),
+                                  next_check_utc=(checked+timedelta(days=7)).isoformat(), last_http_status=code)
 
     def checkpoint():
         atomic_csv(FOLDERS['data'] / 'job_links_current.csv', pd.DataFrame(links.values()))
@@ -1208,19 +1244,20 @@ def refresh(max_pages=3):
             atomic_csv(FOLDERS['data'] / 'jobs_current.csv', records)
 
     def attach_health(key, state):
-        # Collection timestamp stays at the last successful download.
-        if records.empty:
-            return
-        mask = (records['source'] == key[0]) & (records['job_url'] == key[1])
+        if records.empty: return
+        resolved = clean_optional_text(state.get('resolved_job_url')) or key[1]
+        mask = (records['source'] == key[0]) & records['job_url'].isin([key[1], resolved])
         for field in ('page_availability', 'last_checked_utc', 'next_check_utc'):
             if field not in records:
                 records[field] = pd.Series(None, index=records.index, dtype='object')
-            records.loc[mask, field] = state.get(field)
+            if field in state and (field == 'next_check_utc' or clean_optional_text(state[field])):
+                records.loc[mask, field] = state[field]
 
     print('Existing records:', len(records), flush=True)
     for source in SOURCES:
-        row = {'source': source, 'discovered': 0, 'updated': 0, 'failed': 0,
-               'unavailable': 0, 'deferred': 0, 'skipped': 0,
+        source_deadline = time.monotonic() + SOURCE_TIME_BUDGET_SECONDS
+        row = {'source': source, 'discovered': 0, 'updated': 0, 'new_records': 0, 'failed': 0,
+               'unavailable': 0, 'deferred': 0, 'queued': 0, 'attempted': 0, 'pages_checked': 0,
                'last_success_utc': last_success.get(source, 'Never recorded')}
         print('\nChecking', source, flush=True)
         def record_error(url, error, unavailable=False):
@@ -1228,78 +1265,98 @@ def refresh(max_pages=3):
             report['errors'].append({'source': source, 'url': url, 'error': str(error),
                                     'kind': 'page_unavailable' if unavailable else 'request_failed'})
             print('  Problem:', str(error)[:180], flush=True)
+        def save_discovery(found):
+            for link in found:
+                key = (source, canonical_url(link['job_url']))
+                links[key] = {**links.get(key, {'first_seen_utc': started}), **link}
+            checkpoint()
         try:
             read_rules(source)
-            fresh = []
             try:
-                fresh = collect_source_links(source, refresh=True, max_pages=max_pages)
+                fresh = collect_source_links(source, refresh=True, max_pages=max_pages,
+                                             on_page=save_discovery, deadline=source_deadline)
                 row['discovered'] = len(fresh)
             except (requests.RequestException, ValueError, RuntimeError) as error:
                 record_error(SOURCES[source]['listing_url'], error)
-            for link in fresh:
-                key = (source, canonical_url(link['job_url']))
-                links[key] = {**links.get(key, {}), **link}
+            source_pages = [r for r in pagination_report if r['source'] == source]
+            row['pages_checked'] = sum(r.get('downloaded', False) for r in source_pages)
+            for item in source_pages:
+                if item.get('error'): record_error(item['url'], item['error'])
+            row['discovery_stop'] = source_pages[-1]['result'] if source_pages else 'No listing page checked'
+            selected, deferred, due_total = plan_candidates(links, records, source)
+            row['deferred'] = len(deferred)
+            row['queued'] = due_total
+            for key in deferred: attach_health(key, links[key])
             checkpoint()
-            candidates = [r for key, r in links.items() if key[0] == source]
-            for number, link in enumerate(candidates, 1):
-                key = (source, canonical_url(link['job_url']))
-                try:
-                    due = datetime.fromisoformat(str(link.get('next_check_utc')))
-                except (ValueError, TypeError):
-                    due = None
-                if due and due.tzinfo and due > datetime.now(timezone.utc):
+            for number, key in enumerate(selected, 1):
+                if time.monotonic() >= source_deadline:
+                    row['detail_stop'] = 'Source time budget reached'
+                    break
+                link = links[key]
+                latest_due = utc_value(link.get('next_check_utc'))
+                if latest_due and latest_due > datetime.now(timezone.utc):
+                    row['queued'] -= 1
                     row['deferred'] += 1
-                    attach_health(key, link)
                     continue
                 if urlsplit(link['job_url']).netloc in blocked_hosts:
-                    row['skipped'] = len(candidates) - number + 1
-                    record_error(link['job_url'], f"Skipped {row['skipped']} requests: host paused")
+                    row['detail_stop'] = 'Host paused after access/rate-limit response'
                     break
-                print(f"  {number}/{len(candidates)}: {str(link['listing_title'])[:65]}", flush=True)
+                row['attempted'] += 1
+                row['queued'] -= 1
+                print(f"  {number}/{len(selected)}: {str(link['listing_title'])[:65]}", flush=True)
                 try:
                     document = download_source_page(source, link['job_url'], refresh=True)
                     record = extract_job_record(link, document)
+                    record['job_url'] = canonical_url(record['job_url'])
+                    is_new = records.empty or not ((records['source'] == source) &
+                                                     (records['job_url'] == record['job_url'])).any()
+                    due = datetime.fromisoformat(document['fetched_at_utc']) + timedelta(hours=recheck_hours(record))
                     record.update(page_availability='Page retrieved — open status unverified',
-                                  last_checked_utc=document['fetched_at_utc'], next_check_utc=None)
+                                  last_checked_utc=document['fetched_at_utc'], next_check_utc=due.isoformat())
                     records = merge_records([records, pd.DataFrame([record])])
-                    link.update(page_availability=record['page_availability'],
-                                last_checked_utc=record['last_checked_utc'], next_check_utc=None,
-                                last_http_status=200)
+                    # Redirect aliases share the same health to avoid repeated downloads.
+                    for alias_key, alias in links.items():
+                        if alias_key[0] == source and (alias_key == key or alias_key[1] == record['job_url']
+                                or alias.get('resolved_job_url') == record['job_url']):
+                            alias.update(page_availability=record['page_availability'],
+                                         last_checked_utc=record['last_checked_utc'], next_check_utc=due.isoformat(),
+                                         last_http_status=200, resolved_job_url=record['job_url'])
                     row['updated'] += 1
+                    row['new_records'] += int(is_new)
                 except (requests.RequestException, ValueError, RuntimeError) as error:
                     kind, code = failure_kind(error)
                     checked = datetime.now(timezone.utc)
                     link.update(page_availability=kind, last_checked_utc=checked.isoformat(),
-                                next_check_utc=(checked + timedelta(days=7)).isoformat()
-                                if code in (404, 410) else None, last_http_status=code)
+                                next_check_utc=(checked+timedelta(hours=168 if code in (404,410) else 20)).isoformat(),
+                                last_http_status=code)
                     attach_health(key, link)
-                    record_error(link['job_url'], error, unavailable=code in (404, 410))
+                    record_error(link['job_url'], error, unavailable=code in (404,410))
                 checkpoint()
-            checkpoint()
         except (requests.RequestException, ValueError, RuntimeError) as error:
             record_error(SOURCES[source]['base_url'], error)
+            _, deferred, due_total = plan_candidates(links, records, source)
+            row['deferred'], row['queued'] = len(deferred), due_total
         row['result'] = ('Partial' if row['failed'] and row['updated'] else
-                         'Failed' if row['failed'] else
-                         'Completed with unavailable/deferred pages' if row['unavailable'] or row['deferred'] else
-                         'Success within selected scope' if row['updated'] else 'No detail pages checked')
-        if row['updated'] and not (row['failed'] or row['unavailable'] or row['deferred']):
+                         'Failed' if row['failed'] else 'Completed within limits; queue remains' if row['queued'] else
+                         'Completed with unavailable pages' if row['unavailable'] else
+                         'Success within selected scope' if row['updated'] else 'No detail pages due')
+        if not row['failed']:
             row['last_success_utc'] = datetime.now(timezone.utc).isoformat()
-        source_records = records[records['source'] == source] if not records.empty else records
-        row['last_successful_download_utc'] = (str(source_records['collected_at_utc'].max())
-                                               if not source_records.empty else 'Never recorded')
+        subset = records[records['source'] == source] if not records.empty else records
+        row['last_successful_download_utc'] = str(subset['collected_at_utc'].max()) if not subset.empty else 'Never recorded'
         report['sources'].append(row)
+        # A source checkpoint makes interrupted-run diagnostics more useful.
+        atomic_text(report_path, json.dumps(report, indent=2, ensure_ascii=False))
     report['finished_at_utc'] = datetime.now(timezone.utc).isoformat()
     report['pagination'] = pagination_report
+    checkpoint()
     atomic_text(FOLDERS['logs'] / f'refresh_{stamp}.json', json.dumps(report, indent=2, ensure_ascii=False))
     atomic_text(report_path, json.dumps(report, indent=2, ensure_ascii=False))
-    if not records.empty:
-        render_with_report(records, report, max_pages)
+    if not records.empty: render_with_report(records, report, max_pages)
     print('\nREFRESH FINISHED\nStored records:', len(records))
     print(pd.DataFrame(report['sources']).to_string(index=False))
     print('Full error log:', report_path)
-    # A known missing page is a reported warning. Server/access/parser failures still fail the run.
-    return 2 if any(r['failed'] or not (r['updated'] or r['unavailable'] or r['deferred'])
-                    for r in report['sources']) else 0
+    return 2 if any(r['failed'] for r in report['sources']) else 0
 
 
 def main():
@@ -1308,7 +1365,7 @@ def main():
     mode.add_argument('--check', action='store_true', help='Offline setup check only; does not scrape')
     mode.add_argument('--run', action='store_true', help='Collect and rebuild the dashboard once')
     parser.add_argument('--project-dir', default=str(Path.home() / 'ghana_jobs_dashboard_v2'))
-    parser.add_argument('--max-pages', type=int, default=3)
+    parser.add_argument('--max-pages', type=int, default=DEFAULT_MAX_PAGES)
     args = parser.parse_args()
     if args.max_pages < 1:
         parser.error('--max-pages must be positive')

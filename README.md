@@ -1,75 +1,62 @@
 # Ghana jobs dashboard
 
-Daily job-listing dashboard built from real collected data using Python, pandas, Beautiful Soup, and Plotly. This package begins with **316 saved listings** supplied on 11 October 2026: BusinessGhana 219, GhanaCurrentJobs 59, and JobWeb Ghana 38. These are listings, not a confirmed count of unique open vacancies.
+A Python collector and static dashboard for GhanaCurrentJobs, JobWeb Ghana and BusinessGhana. The dashboard displays collected listings; it does not establish that every listing is a unique, currently open vacancy.
 
-## First setup — do these steps in order
+## Collection scope
 
-1. Keep this package separate from the Windows `ghana_jobs_dashboard_v2` folder. It does not replace your working notebook or Windows collector.
-2. In `jkezia767-tech/ghana-jobs-dashboard`, open **Settings → Pages**. Under **Build and deployment → Source**, choose **GitHub Actions**. Do not select a Jekyll template.
-3. Return to **Code → Add file → Upload files**. Open the extracted `ghana-jobs-dashboard` folder on your computer and drag its **contents** into the upload area, preserving both `.github/workflows` and `data` folders. Do not upload the ZIP or the enclosing folder as one nested folder.
-4. The root should contain `.github`, `.gitignore`, `data`, `cloud_run.py`, `refresh_jobs.py`, `requirements.txt`, `README.md`, and `tests`. The workflow must be at `.github/workflows/dashboard.yml`. If the browser omits that folder, use **Add file → Create new file**, enter `.github/workflows/dashboard.yml` as the filename, and paste the entire supplied YAML file. Commit directly to `main` with the message `Prepare online Ghana jobs dashboard`.
-5. Open **Actions → Refresh and publish Ghana jobs**. The first upload publishes the saved data without scraping. Wait for the run to finish; use the Pages URL displayed by the deployment. The expected URL after successful deployment is https://jkezia767-tech.github.io/ghana-jobs-dashboard/ . It is not live merely because you have this package.
-6. After the initial site works, select **Run workflow**, check **collect**, choose `main`, and run once. Allow about an hour; the collector has a 150-minute time limit. Read the Collection refresh table on the published site. A cloud source can fail even when it works from your laptop.
-7. Only after a successful cloud collection, disable **Ghana Job Daily Refresh** in Windows Task Scheduler to avoid collecting twice daily from two computers. The online and local data files do not automatically sync.
+Discovery follows actual pagination links for up to 10 listing pages per source. It stops earlier when no valid next link exists, site rules prohibit access, or a request fails. It saves discovered links after each successful listing page. This is not complete coverage of these sites or of Ghanaian vacancies.
 
-Uploading the workflow enables its daily schedule. Nothing has been registered or published by the preparation of this ZIP alone.
+Each source has a 40-minute work budget and at most 200 detail-page attempts per run. New links and saved jobs due for rechecking share the queue. Unfinished candidates remain saved for a later run. A backlog can take multiple runs to clear; collection is not real-time.
 
-## Schedule, cost, and visibility
+Rechecks become eligible after:
 
-GitHub Actions runs collection at **10:00 AM UTC**, also 10:00 AM in Ghana. GitHub can delay or occasionally drop scheduled starts, so this is not an exact-time service. Public-repository schedules may be disabled after 60 days without repository activity. Check Actions periodically.
+- 20 hours for listings with a parsed deadline that has not expired.
+- 3 days for missing or conflicting deadlines.
+- 7 days for expired deadlines or unavailable pages (HTTP 404/410).
+- 20 hours after other failed detail-page requests.
 
-GitHub Pages supports public repositories on GitHub Free. This workflow uses a standard `ubuntu-latest` hosted runner, whose public-repository compute is free. The small Pages artifact is kept for one day; no custom domain, larger runner, paid add-on, or increased cache allowance is required. Storage quotas still apply. All uploaded code, data, and the saved refresh report are publicly readable.
+The next scheduled run checks eligible jobs within its limits. A future deadline or a successfully retrieved page does not prove that applications remain open. Missing information stays blank. Cross-site duplicate candidates are flagged, not automatically merged.
 
-## How updates work
+## Refresh and publishing
 
-- **GitHub Actions** executes Python while your laptop is off.
-- **GitHub Pages** serves the generated HTML. It does not run Python or scrape sites.
-- The workflow commits `data/jobs_current.csv`, `data/job_links_current.csv`, and `logs/refresh_latest.json` to `main`, so the next run starts with preserved data. Repository history stores previous versions.
-- A normal code upload publishes saved data only. Manual collection and the daily schedule download new data.
-- The webpage checks `version.json` every five minutes and offers a button when a newer published dashboard is available. Clicking it reloads the page and resets filters. Reloading a webpage never starts collection.
-- No access tokens or passwords are needed in your files. The workflow uses GitHub's built-in job token.
+The existing GitHub workflow runs scheduled collection at 10:00 UTC (Ghana time). Scheduled starts can be delayed. A normal Python code upload builds and publishes saved data only. For a manual collection, open Actions, select the dashboard workflow, choose Run workflow, select main, and enable the collect input.
 
-## Failure handling
+GitHub Actions runs Python; GitHub Pages serves the generated HTML. Refreshing the browser does not start a collection. The webpage checks for a newer published version and offers a reload button. The local Windows notebook and the online dataset do not automatically synchronize.
 
-Each successful detail-page extraction saves a checkpoint. Failed requests do not delete prior jobs or mark them closed. Partial refreshes publish retained data with source-level status, then mark the Actions run as failed so the problem is visible. A timeout or unexpected collector exit is labelled as interrupted, and available checkpoints are preserved.
+The workflow retains data/jobs_current.csv, data/job_links_current.csv and logs/refresh_latest.json in the repository. The dashboard Collection refresh table reports discovery, updates, unavailable pages, jobs not yet due, queued work, failures and the last successful detail download. A successful workflow can be a build-only run: check the collection timestamp to confirm new collection.
 
-If collection, commit, rendering, or deployment cannot complete, the previously published website remains available. A hard runner termination or cancellation can prevent checkpoint upload; in that case the last committed dataset remains the starting point, and that interrupted run's uncommitted updates may be lost. Do not edit the data files during a running workflow: competing edits can cause a rebase conflict, which stops publishing instead of overwriting them.
+## Failures and retained data
 
-The per-source 'last success' means all selected requests succeeded. It does not mean every vacancy on that website was collected or is open. The imported laptop data has no bundled refresh report, so the initial cloud page correctly says cloud collection has not been tested.
+Successful extraction and discovery work is checkpointed. Failed requests retain existing jobs and their original successful collection timestamps; they do not mark jobs closed. HTTP 404/410 means page unavailable and job status unverified. Other request failures are reported as failures. Authentication/rate-limit responses stop further requests to that host for the run. Requests respect robots rules and polite delays.
 
-If the first run fails in Configure Pages, confirm **Settings → Pages → GitHub Actions**, then rerun the workflow. If a site returns 401, 403, or 429, the collector stops requests to that host during the run. Do not bypass those restrictions; inspect the source before adding more requests. No automatic whole-workflow retries are configured.
+Partial results can be published with source-level errors. A hard cancellation may prevent uncommitted checkpoints from reaching GitHub. Avoid editing saved data during a running workflow. Repository history retains earlier committed versions.
 
-## Coverage and data limitations
+## Local use
 
-The current discovery scope remains **three listing pages per source**, plus saved candidate links and previously collected jobs. This is not all Ghana websites or all vacancies. Do not increase the cap until pagination and workload have been reviewed. Daily checks of historical URLs may become slower as the dataset grows; incremental refresh is a later improvement.
-
-The original working extraction logic is preserved. Missing fields stay blank. A future deadline does not prove a job is open. Missing/conflicting deadlines remain unverified. Listings with expired parsed deadlines are hidden by default. Source-and-URL duplicates are removed; possible cross-site duplicates are flagged for review, not merged. Employer, salary, and posting-date coverage is incomplete. No sample jobs are included in the public dataset.
-
-## Working locally
-
-For this separate project folder (Python 3.12 recommended):
+Install dependencies in your environment:
 
 ```sh
 python -m pip install -r requirements.txt
+```
+
+In Jupyter, use `%pip install -r requirements.txt` instead.
+
+Build from saved records without scraping:
+
+```sh
 python cloud_run.py --project-dir .
 ```
 
-This builds `_site/index.html` from saved data without making website requests. For a real refresh:
+Collect, then build:
 
 ```sh
 python cloud_run.py --collect --project-dir .
 ```
 
-In Jupyter, install dependencies with `%pip install -r requirements.txt`. Your existing teaching notebook remains your local learning environment.
+Output is _site/index.html. The cloud wrapper has a 150-minute collector timeout. The workflow configuration is unchanged by this update.
 
 ## Validation
 
-The package is tested against the supplied real CSVs for offline rendering and against simulated failures in isolated temporary folders for preservation of previous records and interrupted-run reporting. No synthetic test records are added to the published data. The cloud workflow still needs its first real GitHub run; network access from GitHub has not been verified here.
+The November 2026 coverage update passed eight offline tests: real-data rendering, source-failure preservation, timeout handling, recheck eligibility, partial pagination retention, pagination limits, queued work across repeated runs, and time-budget retention. Synthetic fixtures are isolated from saved job data. Expanded pagination still requires a live run, especially BusinessGhana, which timed out during the preparation check.
 
-Run offline checks with `python -m unittest discover -s tests -v`.
-
-## Official references
-
-- [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [Scheduled workflow timing and inactivity limits](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
-- [GitHub Actions billing and free standard runners](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
+Run repository tests with `python -m unittest discover -s tests -v`. The update ZIP includes additional incremental tests in its validation folder; these can be copied into tests when desired.
