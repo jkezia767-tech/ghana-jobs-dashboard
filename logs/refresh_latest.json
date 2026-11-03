@@ -1,121 +1,348 @@
 {
-  "attempted_at_utc": "2026-11-02T14:16:44.722112+00:00",
+  "attempted_at_utc": "2026-11-03T09:08:15.128818+00:00",
+  "max_pages": 10,
+  "max_details_per_source": 200,
+  "source_time_budget_seconds": 2400,
   "sources": [
     {
       "source": "GhanaCurrentJobs",
-      "discovered": 60,
-      "updated": 128,
+      "discovered": 199,
+      "updated": 71,
+      "new_records": 71,
       "failed": 0,
       "unavailable": 0,
-      "deferred": 0,
-      "skipped": 0,
-      "last_success_utc": "2026-11-02T14:26:17.321236+00:00",
+      "deferred": 128,
+      "queued": 0,
+      "attempted": 71,
+      "pages_checked": 10,
+      "last_success_utc": "2026-11-03T09:14:05.254191+00:00",
+      "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-02T14:26:17.280114+00:00"
+      "last_successful_download_utc": "2026-11-03T09:14:05.223381+00:00"
     },
     {
       "source": "JobWeb Ghana",
-      "discovered": 32,
-      "updated": 69,
+      "discovered": 100,
+      "updated": 47,
+      "new_records": 47,
       "failed": 0,
       "unavailable": 0,
-      "deferred": 0,
-      "skipped": 0,
-      "last_success_utc": "2026-11-02T14:30:07.880054+00:00",
+      "deferred": 69,
+      "queued": 0,
+      "attempted": 47,
+      "pages_checked": 10,
+      "last_success_utc": "2026-11-03T09:17:06.038216+00:00",
+      "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-02T14:30:07.822011+00:00"
+      "last_successful_download_utc": "2026-11-03T09:17:05.993394+00:00"
     },
     {
       "source": "BusinessGhana",
-      "discovered": 161,
-      "updated": 407,
-      "failed": 0,
-      "unavailable": 2,
-      "deferred": 3,
-      "skipped": 0,
+      "discovered": 77,
+      "updated": 4,
+      "new_records": 4,
+      "failed": 15,
+      "unavailable": 0,
+      "deferred": 411,
+      "queued": 0,
+      "attempted": 18,
+      "pages_checked": 1,
       "last_success_utc": "Never recorded",
-      "result": "Completed with unavailable/deferred pages",
-      "last_successful_download_utc": "2026-11-02T15:49:36.805759+00:00"
+      "discovery_stop": "Listing request/structure failed",
+      "result": "Partial",
+      "last_successful_download_utc": "2026-11-03T09:24:31.953034+00:00"
     }
   ],
   "errors": [
     {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/restaurant-management-jobs/492528/Restaurant-Manager-Spintex",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/restaurant-management-jobs/492528/Restaurant-Manager-Spintex",
-      "kind": "page_unavailable"
+      "url": "https://www.businessghana.com/site/jobs?page=2",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs?page=2",
+      "kind": "request_failed"
     },
     {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/teacher-jobs/494459/Preschool-Teacher-needed-at-Mobole-Afienya-Dodowa-Rd",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/teacher-jobs/494459/Preschool-Teacher-needed-at-Mobole-Afienya-Dodowa-Rd",
-      "kind": "page_unavailable"
+      "url": "https://www.businessghana.com/site/jobs/waiter-jobs /493985/Waiter-East-Legon",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/waiter-jobs%20/493985/Waiter-East-Legon",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/cleaner-jobs/494610/Cleaners",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/driver-jobs/435624/Professional-Driver-Accra",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/driver-jobs/435624/Professional-Driver-Accra",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/driver-jobs/493243/Drivers-Needed-for-Employment-Airport-Hills",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/driver-jobs/493243/Drivers-Needed-for-Employment-Airport-Hills",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/field-sales-representatives-jobs/494329/Sales-Representatives-2",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/field-sales-representatives-jobs/494329/Sales-Representatives-2",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/field-sales-representatives-jobs/494331/Field-Sales-Representative",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/field-sales-representatives-jobs/494331/Field-Sales-Representative",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/marketer-jobs/494607/Customer-Service-Officer",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/marketer-jobs/494607/Customer-Service-Officer",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/operations-manager-jobs/489315/Warehouse-Manager-Needed-for-Employment-Tema",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/operations-manager-jobs/489315/Warehouse-Manager-Needed-for-Employment-Tema",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-construction-jobs/494612/Experienced-Excavator-Operator",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-construction-jobs/494612/Experienced-Excavator-Operator",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-education-jobs/494617/National-Service-Personnel-Learning-Support-Associate",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-education-jobs/494617/National-Service-Personnel-Learning-Support-Associate",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-healthcare-jobs/494619/National-Service-Personnel-Purchasing-Supply",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-healthcare-jobs/494619/National-Service-Personnel-Purchasing-Supply",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-healthcare-jobs/494620/National-Service-Personnel-Marketing",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-healthcare-jobs/494620/National-Service-Personnel-Marketing",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-sales-jobs/494621/Technical-Sales-Representative-Engineering",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-sales-jobs/494621/Technical-Sales-Representative-Engineering",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/restaurant-staff-jobs/494609/Kitchen-Assistants",
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/restaurant-staff-jobs/494609/Kitchen-Assistants",
+      "kind": "request_failed"
     }
   ],
-  "finished_at_utc": "2026-11-02T15:49:36.861036+00:00",
+  "finished_at_utc": "2026-11-03T09:24:31.995500+00:00",
   "pagination": [
     {
       "source": "GhanaCurrentJobs",
       "page": 1,
+      "url": "https://www.ghanacurrentjobs.com/",
       "new_unique_links": 20,
       "total_unique_links": 20,
-      "result": "Continue"
+      "result": "Continue",
+      "downloaded": true
     },
     {
       "source": "GhanaCurrentJobs",
       "page": 2,
+      "url": "https://www.ghanacurrentjobs.com/page/2/",
       "new_unique_links": 20,
       "total_unique_links": 40,
-      "result": "Continue"
+      "result": "Continue",
+      "downloaded": true
     },
     {
       "source": "GhanaCurrentJobs",
       "page": 3,
+      "url": "https://www.ghanacurrentjobs.com/page/3/",
       "new_unique_links": 20,
       "total_unique_links": 60,
-      "result": "Page limit reached"
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 4,
+      "url": "https://www.ghanacurrentjobs.com/page/4/",
+      "new_unique_links": 20,
+      "total_unique_links": 80,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 5,
+      "url": "https://www.ghanacurrentjobs.com/page/5/",
+      "new_unique_links": 20,
+      "total_unique_links": 100,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 6,
+      "url": "https://www.ghanacurrentjobs.com/page/6/",
+      "new_unique_links": 19,
+      "total_unique_links": 119,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 7,
+      "url": "https://www.ghanacurrentjobs.com/page/7/",
+      "new_unique_links": 20,
+      "total_unique_links": 139,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 8,
+      "url": "https://www.ghanacurrentjobs.com/page/8/",
+      "new_unique_links": 20,
+      "total_unique_links": 159,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 9,
+      "url": "https://www.ghanacurrentjobs.com/page/9/",
+      "new_unique_links": 20,
+      "total_unique_links": 179,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "GhanaCurrentJobs",
+      "page": 10,
+      "url": "https://www.ghanacurrentjobs.com/page/10/",
+      "new_unique_links": 20,
+      "total_unique_links": 199,
+      "result": "Page limit reached",
+      "downloaded": true
     },
     {
       "source": "JobWeb Ghana",
       "page": 1,
+      "url": "https://jobwebghana.com/",
       "new_unique_links": 14,
       "total_unique_links": 14,
-      "result": "Continue"
+      "result": "Continue",
+      "downloaded": true
     },
     {
       "source": "JobWeb Ghana",
       "page": 2,
+      "url": "https://jobwebghana.com/jobs/page/2/",
       "new_unique_links": 8,
       "total_unique_links": 22,
-      "result": "Continue"
+      "result": "Continue",
+      "downloaded": true
     },
     {
       "source": "JobWeb Ghana",
       "page": 3,
+      "url": "https://jobwebghana.com/jobs/page/3/",
       "new_unique_links": 10,
       "total_unique_links": 32,
-      "result": "Page limit reached"
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 4,
+      "url": "https://jobwebghana.com/jobs/page/4/",
+      "new_unique_links": 10,
+      "total_unique_links": 42,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 5,
+      "url": "https://jobwebghana.com/jobs/page/5/",
+      "new_unique_links": 9,
+      "total_unique_links": 51,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 6,
+      "url": "https://jobwebghana.com/jobs/page/6/",
+      "new_unique_links": 10,
+      "total_unique_links": 61,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 7,
+      "url": "https://jobwebghana.com/jobs/page/7/",
+      "new_unique_links": 10,
+      "total_unique_links": 71,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 8,
+      "url": "https://jobwebghana.com/jobs/page/8/",
+      "new_unique_links": 10,
+      "total_unique_links": 81,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 9,
+      "url": "https://jobwebghana.com/jobs/page/9/",
+      "new_unique_links": 9,
+      "total_unique_links": 90,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 10,
+      "url": "https://jobwebghana.com/jobs/page/10/",
+      "new_unique_links": 10,
+      "total_unique_links": 100,
+      "result": "Page limit reached",
+      "downloaded": true
     },
     {
       "source": "BusinessGhana",
       "page": 1,
-      "new_unique_links": 78,
-      "total_unique_links": 78,
-      "result": "Continue"
+      "url": "https://www.businessghana.com/site/jobs",
+      "new_unique_links": 77,
+      "total_unique_links": 77,
+      "result": "Continue",
+      "downloaded": true
     },
     {
       "source": "BusinessGhana",
       "page": 2,
-      "new_unique_links": 39,
-      "total_unique_links": 117,
-      "result": "Continue"
-    },
-    {
-      "source": "BusinessGhana",
-      "page": 3,
-      "new_unique_links": 44,
-      "total_unique_links": 161,
-      "result": "Page limit reached"
+      "url": "https://www.businessghana.com/site/jobs?page=2",
+      "result": "Listing request/structure failed",
+      "downloaded": false,
+      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs?page=2"
     }
   ]
 }
