@@ -1,5 +1,5 @@
 {
-  "attempted_at_utc": "2026-11-04T10:59:56.902101+00:00",
+  "attempted_at_utc": "2026-11-05T10:53:54.754783+00:00",
   "max_pages": 10,
   "max_details_per_source": 200,
   "source_time_budget_seconds": 2400,
@@ -7,18 +7,18 @@
     {
       "source": "GhanaCurrentJobs",
       "discovered": 199,
-      "updated": 46,
-      "new_records": 5,
+      "updated": 55,
+      "new_records": 10,
       "failed": 0,
       "unavailable": 0,
-      "deferred": 158,
+      "deferred": 159,
       "queued": 0,
-      "attempted": 46,
+      "attempted": 55,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-04T11:03:55.725975+00:00",
+      "last_success_utc": "2026-11-05T10:58:35.621994+00:00",
       "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-04T11:03:55.701863+00:00"
+      "last_successful_download_utc": "2026-11-05T10:58:35.597503+00:00"
     },
     {
       "source": "JobWeb Ghana",
@@ -31,37 +31,30 @@
       "queued": 0,
       "attempted": 20,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-04T11:05:33.148407+00:00",
+      "last_success_utc": "2026-11-05T11:00:09.033016+00:00",
       "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-04T11:05:33.117002+00:00"
+      "last_successful_download_utc": "2026-11-05T11:00:08.996146+00:00"
     },
     {
       "source": "BusinessGhana",
       "discovered": 492,
-      "updated": 199,
-      "new_records": 39,
+      "updated": 200,
+      "new_records": 9,
       "failed": 0,
-      "unavailable": 1,
-      "deferred": 322,
-      "queued": 59,
+      "unavailable": 0,
+      "deferred": 338,
+      "queued": 52,
       "attempted": 200,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-04T11:44:04.548926+00:00",
+      "last_success_utc": "2026-11-05T11:37:32.008182+00:00",
       "discovery_stop": "Page limit reached",
       "result": "Completed within limits; queue remains",
-      "last_successful_download_utc": "2026-11-04T11:44:04.518714+00:00"
+      "last_successful_download_utc": "2026-11-05T11:37:31.927998+00:00"
     }
   ],
-  "errors": [
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/teacher-jobs/494504/JHS-Science-Teacher-needed-at-Ablekuma-Newtown",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/teacher-jobs/494504/JHS-Science-Teacher-needed-at-Ablekuma-Newtown",
-      "kind": "page_unavailable"
-    }
-  ],
-  "finished_at_utc": "2026-11-04T11:44:04.549662+00:00",
+  "errors": [],
+  "finished_at_utc": "2026-11-05T11:37:32.008971+00:00",
   "pagination": [
     {
       "source": "GhanaCurrentJobs",
@@ -247,8 +240,8 @@
       "source": "BusinessGhana",
       "page": 1,
       "url": "https://www.businessghana.com/site/jobs",
-      "new_unique_links": 72,
-      "total_unique_links": 72,
+      "new_unique_links": 79,
+      "total_unique_links": 79,
       "result": "Continue",
       "downloaded": true
     },
@@ -256,8 +249,8 @@
       "source": "BusinessGhana",
       "page": 2,
       "url": "https://www.businessghana.com/site/jobs?page=2",
-      "new_unique_links": 45,
-      "total_unique_links": 117,
+      "new_unique_links": 47,
+      "total_unique_links": 126,
       "result": "Continue",
       "downloaded": true
     },
@@ -265,8 +258,8 @@
       "source": "BusinessGhana",
       "page": 3,
       "url": "https://www.businessghana.com/site/jobs?page=3",
-      "new_unique_links": 48,
-      "total_unique_links": 165,
+      "new_unique_links": 40,
+      "total_unique_links": 166,
       "result": "Continue",
       "downloaded": true
     },
@@ -274,8 +267,8 @@
       "source": "BusinessGhana",
       "page": 4,
       "url": "https://www.businessghana.com/site/jobs?page=4",
-      "new_unique_links": 45,
-      "total_unique_links": 210,
+      "new_unique_links": 43,
+      "total_unique_links": 209,
       "result": "Continue",
       "downloaded": true
     },
@@ -283,8 +276,8 @@
       "source": "BusinessGhana",
       "page": 5,
       "url": "https://www.businessghana.com/site/jobs?page=5",
-      "new_unique_links": 49,
-      "total_unique_links": 259,
+      "new_unique_links": 47,
+      "total_unique_links": 256,
       "result": "Continue",
       "downloaded": true
     },
@@ -292,8 +285,8 @@
       "source": "BusinessGhana",
       "page": 6,
       "url": "https://www.businessghana.com/site/jobs?page=6",
-      "new_unique_links": 48,
-      "total_unique_links": 307,
+      "new_unique_links": 47,
+      "total_unique_links": 303,
       "result": "Continue",
       "downloaded": true
     },
@@ -301,8 +294,8 @@
       "source": "BusinessGhana",
       "page": 7,
       "url": "https://www.businessghana.com/site/jobs?page=7",
-      "new_unique_links": 48,
-      "total_unique_links": 355,
+      "new_unique_links": 47,
+      "total_unique_links": 350,
       "result": "Continue",
       "downloaded": true
     },
@@ -310,7 +303,7 @@
       "source": "BusinessGhana",
       "page": 8,
       "url": "https://www.businessghana.com/site/jobs?page=8",
-      "new_unique_links": 42,
+      "new_unique_links": 47,
       "total_unique_links": 397,
       "result": "Continue",
       "downloaded": true
@@ -319,8 +312,8 @@
       "source": "BusinessGhana",
       "page": 9,
       "url": "https://www.businessghana.com/site/jobs?page=9",
-      "new_unique_links": 48,
-      "total_unique_links": 445,
+      "new_unique_links": 46,
+      "total_unique_links": 443,
       "result": "Continue",
       "downloaded": true
     },
@@ -328,7 +321,7 @@
       "source": "BusinessGhana",
       "page": 10,
       "url": "https://www.businessghana.com/site/jobs?page=10",
-      "new_unique_links": 47,
+      "new_unique_links": 49,
       "total_unique_links": 492,
       "result": "Page limit reached",
       "downloaded": true
