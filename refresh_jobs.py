@@ -25,12 +25,22 @@ SOURCES = {
         "listing_url": "https://jobwebghana.com/",
         "delay": 3
     },
+    "JobSearch Ghana": {
+        "base_url": "https://www.jobsearchgh.com",
+        "listing_url": "https://www.jobsearchgh.com/",
+        "delay": 5,
+        "max_pages": 3,
+        "max_details": 50,
+        "time_budget_seconds": 15 * 60
+    },
     "BusinessGhana": {
         "base_url": "https://www.businessghana.com",
         "listing_url": "https://www.businessghana.com/site/jobs",
         "delay": 10
     }
 }
+
+SOURCES["JobSearch Ghana"] = SOURCES.pop("JobSearch Ghana")
 
 USER_AGENT = "GhanaJobsLearningProject/0.1"
 
@@ -48,6 +58,7 @@ robots_documents = {}
 JOB_PATH_PATTERNS = {
     "GhanaCurrentJobs": r"^/job-vacancy-for-[^/]+/?$",
     "JobWeb Ghana": r"^/jobs/[^/]+/?$",
+    "JobSearch Ghana": r"^/jobs/\d+/[^/]+/?$",
     "BusinessGhana": r"^/site/jobs/[^/]+/\d+/[^/]+/?$"
 }
 
@@ -225,6 +236,39 @@ def extract_job_record(link, document):
         )
         if date_match:
             posted = parse_job_date(date_match.group(1))
+
+    elif source == "JobSearch Ghana":
+        header = page.find("h1")
+        meta = page.select_one("#desc_div .entry-meta")
+        description = page.select_one("#job-description")
+        if not header or not meta or not description:
+            raise ValueError("Expected JobSearch Ghana vacancy fields were not found.")
+        record["job_title"] = clean_text(header.get_text(" ", strip=True))
+        if jobsearch_roundup(record["job_title"]):
+            raise ValueError("This is a roundup article, not an individual vacancy.")
+        # Read the visible vacancy header, never sidebar links or hidden SEO defaults.
+        for field, prefix in [("employer", "/jobs/company/"),
+                              ("category", "/job/category/"),
+                              ("location", "/job/location/"),
+                              ("employment_type", "/job/status/")]:
+            anchor = meta.find("a", href=lambda h: bool(h and h.startswith(prefix)))
+            record[field] = clean_text(anchor.get_text(" ", strip=True)) if anchor else None
+        if not record["employer"]:
+            raise ValueError("JobSearch Ghana vacancy has no visible employer; review needed.")
+        date_tag = meta.select_one("#publish_date")
+        if date_tag:
+            raw = date_tag.get_text(" ", strip=True)
+            for fmt in ("%B %d, %Y", "%b %d, %Y"):
+                try:
+                    posted = datetime.strptime(raw, fmt).date()
+                    break
+                except ValueError:
+                    pass
+        money = meta.select_one("i.fa-money")
+        record["salary_raw"] = clean_text(money.parent.get_text(" ", strip=True)) if money else None
+        # validThrough/baseSalary JSON-LD values were not corroborated by visible text.
+        # Do not substitute them for a stated application deadline or salary.
+        main_text = description.get_text(" ", strip=True)
 
     elif source == "BusinessGhana":
         if "Job Category" not in lines or "Job Type" not in lines:
@@ -870,10 +914,23 @@ def listing_page_number(source_name, url):
             return 1
         match = re.fullmatch(r"/jobs/page/(\d+)", path)
 
+    elif source_name == "JobSearch Ghana":
+        if path in ("/", "/jobs/ghana"):
+            return 1
+        match = re.fullmatch(r"/jobs/ghana/page/(\d+)", path)
+
     else:
         return None
 
     return int(match.group(1)) if match else None
+
+def jobsearch_roundup(title):
+    """Exclude observed job-guide/roundup headings, without excluding role plurals."""
+    return bool(re.search(
+        r"latest jobs (?:in )?ghana today|full application guide|"
+        r"latest (?:accounting|engineering|administrative|sales|ngo|it).*jobs.*ghana",
+        title or "", re.IGNORECASE))
+
 
 def collect_source_links(source_name, refresh=False, max_pages=10, on_page=None, deadline=None):
     """Follow real next links; retain earlier pages when a later page fails."""
@@ -898,11 +955,14 @@ def collect_source_links(source_name, refresh=False, max_pages=10, on_page=None,
                 raise ValueError('Listing redirected to a different page number; pagination needs inspection.')
             page = BeautifulSoup(document['text'], 'html.parser')
             found = {}
-            for anchor in page.find_all('a', href=True):
+            anchors = (page.select('.blog-content h2 a[href]') if source_name == 'JobSearch Ghana'
+                       else page.find_all('a', href=True))
+            for anchor in anchors:
                 candidate = canonical_url(urljoin(final_url, anchor['href']))
                 if not re.match(JOB_PATH_PATTERNS[source_name], urlsplit(candidate).path): continue
                 if not source_allows_url(source_name, candidate): continue
                 title = anchor.get_text(' ', strip=True)
+                if source_name == 'JobSearch Ghana' and jobsearch_roundup(title): continue
                 if not title or title.lower() in {'details','view details','read more'}: continue
                 found.setdefault(candidate, {'source': source_name, 'listing_title': title,
                                   'job_url': candidate, 'links_collected_at_utc': document['fetched_at_utc']})
@@ -1195,7 +1255,8 @@ def render_with_report(records, report, max_pages):
                  'Only real next-page links are followed. This is not complete website coverage.</p>'
                  '<p>Discovery now allows up to 10 pages per source. Detail checks alternate '
                  'between new jobs and the oldest due rechecks, with up to 200 checks and a '
-                 '40-minute budget per source. Waiting links are saved for a later run.</p>'
+                 '40-minute budget per original source. JobSearch Ghana starts with up to 3 listing '
+                 'pages, 50 detail checks and 15 minutes. Waiting links are saved for a later run.</p>'
                  '<p>Recheck intervals: within a listed deadline, 20 hours; missing/conflicting '
                  'deadlines, 3 days; expired deadlines or unavailable pages, 7 days; failed '
                  'requests, 20 hours. Not due yet means no download was needed this run. '
@@ -1255,10 +1316,14 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
 
     print('Existing records:', len(records), flush=True)
     for source in SOURCES:
-        source_deadline = time.monotonic() + SOURCE_TIME_BUDGET_SECONDS
+        config = SOURCES[source]
+        source_deadline = time.monotonic() + config.get("time_budget_seconds", SOURCE_TIME_BUDGET_SECONDS)
         row = {'source': source, 'discovered': 0, 'updated': 0, 'new_records': 0, 'failed': 0,
                'unavailable': 0, 'deferred': 0, 'queued': 0, 'attempted': 0, 'pages_checked': 0,
                'last_success_utc': last_success.get(source, 'Never recorded')}
+        row.update(page_limit=min(max_pages, config.get('max_pages', max_pages)),
+                   detail_limit=config.get('max_details', MAX_DETAILS_PER_SOURCE),
+                   time_budget_seconds=config.get('time_budget_seconds', SOURCE_TIME_BUDGET_SECONDS))
         print('\nChecking', source, flush=True)
         def record_error(url, error, unavailable=False):
             row['unavailable' if unavailable else 'failed'] += 1
@@ -1273,7 +1338,7 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
         try:
             read_rules(source)
             try:
-                fresh = collect_source_links(source, refresh=True, max_pages=max_pages,
+                fresh = collect_source_links(source, refresh=True, max_pages=min(max_pages, config.get("max_pages", max_pages)),
                                              on_page=save_discovery, deadline=source_deadline)
                 row['discovered'] = len(fresh)
             except (requests.RequestException, ValueError, RuntimeError) as error:
@@ -1284,6 +1349,7 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
                 if item.get('error'): record_error(item['url'], item['error'])
             row['discovery_stop'] = source_pages[-1]['result'] if source_pages else 'No listing page checked'
             selected, deferred, due_total = plan_candidates(links, records, source)
+            selected = selected[:config.get("max_details", MAX_DETAILS_PER_SOURCE)]
             row['deferred'] = len(deferred)
             row['queued'] = due_total
             for key in deferred: attach_health(key, links[key])
