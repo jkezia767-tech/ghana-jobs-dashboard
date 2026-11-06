@@ -1,0 +1,55 @@
+name: Check GLMIS access
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Check public GLMIS pages
+        shell: bash
+        run: |
+          python -u - <<'PY'
+          import time
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+          from urllib.robotparser import RobotFileParser
+          agent = 'GhanaJobsLearningProject/0.1'
+          base = 'https://www.glmis.gov.gh'
+          def fetch(path):
+              url = base + path
+              try:
+                  with urlopen(Request(url, headers={'User-Agent': agent}), timeout=30) as r:
+                      body = r.read(2000000).decode('utf-8', errors='replace')
+                      print(f'{url}: HTTP {r.status}; final URL: {r.url}', flush=True)
+                      return r.status, body
+              except HTTPError as e:
+                  print(f'{url}: HTTP {e.code}', flush=True)
+                  return e.code, ''
+          status, body = fetch('/robots.txt')
+          rules = RobotFileParser()
+          if status == 200:
+              if '<html' in body.lower() or '<!doctype' in body.lower():
+                  raise SystemExit('Robots response was HTML; stop and review.')
+              rules.parse(body.splitlines())
+          elif status in (404, 410):
+              print('No robots.txt file found. This is not permission to republish content.')
+              rules.parse(['User-agent: *', 'Allow: /'])
+          else:
+              raise SystemExit('Rules request failed; stopping without requesting job pages.')
+          for path, marker in [('/Jobs/', 'Job Vacancies'),
+                               ('/JobPostings/JobDetails/5521', 'Job Description')]:
+              if not rules.can_fetch(agent, base + path):
+                  raise SystemExit('Robots rules exclude this URL; stopping.')
+              time.sleep(max(5, rules.crawl_delay(agent) or 0))
+              status, body = fetch(path)
+              if status != 200 or marker not in body:
+                  raise SystemExit('Expected public job page not returned; stop and review.')
+              print('Expected public page text found.', flush=True)
+          print('ACCESS CHECK PASSED. No jobs saved and no dashboard changes made.')
+          PY
