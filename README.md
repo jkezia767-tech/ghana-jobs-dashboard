@@ -1,79 +1,59 @@
 # Ghana jobs dashboard
 
-A Python collector and static dashboard for GhanaCurrentJobs, JobWeb Ghana, BusinessGhana and JobSearch Ghana. The dashboard displays collected listings; it does not establish that every listing is a unique, currently open vacancy.
+Python collection and a GitHub Pages dashboard for GhanaCurrentJobs, JobWeb Ghana, BusinessGhana and GLMIS (Ghana Labour Market Information System).
+
+JobSearch Ghana is paused after HTTP 403 responses from GitHub. Its extractor is retained for future review, but it is not in the active source list and receives no requests.
+
+## Installation of the GLMIS update
+
+Upload refresh_jobs.py and README.md from upload_to_github to the repository root on main. The collector MUST be named refresh_jobs.py. The uploaded repository contained refresh_jobs (1).py, which the workflow does not run. A numbered filename does not replace the active collector.
+
+Keep cloud_run.py, requirements.txt, .github/workflows/dashboard.yml, all data files and logs. The separate GLMIS access-check workflow can remain. This package contains no replacement CSVs or refresh report.
+
+After the upload finishes publishing saved records, run Refresh and publish Ghana jobs manually with collect checked. Review the GLMIS row, actual pages checked, new records, failures and timestamps. Future scheduled collections include GLMIS automatically. The first complete GitHub collection still needs verification.
 
 ## Collection scope
 
-Discovery follows actual pagination links for up to 10 listing pages per original source and 3 for JobSearch Ghana. It stops earlier when no valid next link exists, site rules prohibit access, or a request fails. It saves discovered links after each successful listing page. This is not complete coverage of these sites or of Ghanaian vacancies.
+The three original sources each allow up to 10 listing pages, 200 detail checks and 40 minutes per run. GLMIS runs last and allows up to 3 pages, 50 detail checks and 15 minutes. Total source budgets are 135 minutes, below the existing cloud collector timeout of 150 minutes. A single in-flight request may finish after a source budget expires. Only actual pagination links are followed. This is not complete website coverage.
 
-Each original source has a 40-minute work budget and at most 200 detail-page attempts per run. JobSearch Ghana starts with 15 minutes and at most 50 detail-page attempts. These budgets total 135 minutes, leaving headroom under the existing 150-minute collector timeout. New links and saved jobs due for rechecking share the queue. Unfinished candidates remain saved for a later run. A backlog can take multiple runs to clear; collection is not real-time.
+New links and saved jobs due for rechecking share capacity. Unfinished links remain queued. Recheck eligibility is 20 hours for future/today deadlines; 3 days for missing/conflicting deadlines; 7 days for expired deadlines or unavailable pages; 20 hours after other request failures. A scheduled run checks eligible records within its limits.
 
-Rechecks become eligible after:
+Requests are spaced and robots rules are checked every run. GLMIS robots.txt returned 404 in the access check and preparation; only 404/410 missing-rule responses are treated as absent rules for this source (RFC 9309 section 2.3.1.3). Robots rules are not authorization to republish. Authentication, rate-limit, server, and network failures do not get this fallback. A newly published robots policy will be read normally. No logins or application submissions are automated.
 
-- 20 hours for listings with a parsed deadline that has not expired.
-- 3 days for missing or conflicting deadlines.
-- 7 days for expired deadlines or unavailable pages (HTTP 404/410).
-- 20 hours after other failed detail-page requests.
+## GLMIS data limitations
 
-The next scheduled run checks eligible jobs within its limits. A future deadline or a successfully retrieved page does not prove that applications remain open. Missing information stays blank. Cross-site duplicate candidates are flagged, not automatically merged.
+The extractor uses the public job-detail card for title, employer, full location text, category and employment type. It avoids profile forms and unrelated page content. Relative posting ages such as Posted 4 days ago are not converted into an exact date. Missing salaries/deadlines remain blank; explicitly labelled closing dates can be parsed. The job-detail link is supplied so visitors can review and apply through the source; applying may require a GLMIS account.
 
-## Refresh and publishing
+GLMIS also carries overseas opportunities. Explicit destination terms in titles/location (including Bulgaria, Europe, Qatar and UAE) are excluded. This is a conservative filter, not a guarantee that every remaining advert is located in Ghana. Ambiguous adverts still require review; employer location can differ from work location.
 
-The existing GitHub workflow runs scheduled collection at 10:00 UTC (Ghana time). Scheduled starts can be delayed. A normal Python code upload builds and publishes saved data only. For a manual collection, open Actions, select the dashboard workflow, choose Run workflow, select main, and enable the collect input.
+A collected listing is not proof that a vacancy remains open. Jobs past a parsed deadline are excluded from the default active view; missing or conflicting deadlines remain unverified. Cross-site duplicate candidates are flagged, not merged. Source-and-URL duplicates are removed.
 
-GitHub Actions runs Python; GitHub Pages serves the generated HTML. Refreshing the browser does not start a collection. The webpage checks for a newer published version and offers a reload button. The local Windows notebook and the online dataset do not automatically synchronize.
+## Updates and failure handling
 
-The workflow retains data/jobs_current.csv, data/job_links_current.csv and logs/refresh_latest.json in the repository. The dashboard Collection refresh table reports discovery, updates, unavailable pages, jobs not yet due, queued work, failures and the last successful detail download. A successful workflow can be a build-only run: check the collection timestamp to confirm new collection.
+The existing GitHub workflow schedules collection at 10:00 UTC/Ghana time. Actual starts can be delayed. A normal code upload publishes saved data without collection. Manual collection requires checking collect. Browser refreshes never collect vacancies; the webpage checks for a newer published version and offers reload.
 
-## Failures and retained data
-
-Successful extraction and discovery work is checkpointed. Failed requests retain existing jobs and their original successful collection timestamps; they do not mark jobs closed. HTTP 404/410 means page unavailable and job status unverified. Other request failures are reported as failures. Authentication/rate-limit responses stop further requests to that host for the run. Requests respect robots rules and polite delays.
-
-Partial results can be published with source-level errors. A hard cancellation may prevent uncommitted checkpoints from reaching GitHub. Avoid editing saved data during a running workflow. Repository history retains earlier committed versions.
+Successful discovery and extraction work is checkpointed. Failed requests preserve earlier records and successful collection timestamps. Unavailable pages do not establish that jobs are closed. Partial results can publish while the workflow flags errors. A hard cancellation may prevent uncommitted checkpoints from reaching GitHub. The workflow commits data/jobs_current.csv, data/job_links_current.csv and logs/refresh_latest.json for subsequent runs.
 
 ## Local use
 
-Install dependencies in your environment:
+Install packages with python -m pip install -r requirements.txt (in Jupyter use %pip install -r requirements.txt).
 
-```sh
-python -m pip install -r requirements.txt
-```
+Build saved data: python cloud_run.py --project-dir .
+Collect and build: python cloud_run.py --collect --project-dir .
+Output: _site/index.html.
 
-In Jupyter, use `%pip install -r requirements.txt` instead.
+## Validation — 10 November 2026
 
-Build from saved records without scraping:
+The user confirmed a passing GLMIS access check from GitHub. During preparation the actual collector fetched two listing pages and extracted two real detail pages, discovering 17 candidates after explicit overseas-title exclusions. These test records were not inserted into the saved dataset. Nine tests passed for existing offline rendering, data retention on source failure, timeout handling, GLMIS field/date extraction, overseas exclusions, pagination, missing-versus-failed robots requests, paused-source/budget settings, and checkpoint/report integration.
 
-```sh
-python cloud_run.py --project-dir .
-```
+The optional validation/test_glmis.py file can be copied into tests/ alongside test_cloud.py. Run python -m unittest discover -s tests -v. Synthetic fixtures are isolated from real saved data.
 
-Collect, then build:
+## Reviewed sources
 
-```sh
-python cloud_run.py --collect --project-dir .
-```
+- https://www.glmis.gov.gh/Jobs/
+- https://www.glmis.gov.gh/JobPostings/JobDetails/5521
+- https://www.glmis.gov.gh/PrivacyPolicy
+- https://www.glmis.gov.gh/robots.txt
+- https://www.rfc-editor.org/rfc/rfc9309.html
 
-Output is _site/index.html. The cloud wrapper has a 150-minute collector timeout. The workflow configuration is unchanged by this update.
-
-## Validation
-
-The November 2026 coverage update passed eight offline tests: real-data rendering, source-failure preservation, timeout handling, recheck eligibility, partial pagination retention, pagination limits, queued work across repeated runs, and time-budget retention. Synthetic fixtures are isolated from saved job data. Expanded pagination still requires a live run, especially BusinessGhana, which timed out during the preparation check.
-
-Run repository tests with `python -m unittest discover -s tests -v`. The update ZIP includes additional incremental tests in its validation folder; these can be copied into tests when desired.
-
-## JobSearch Ghana expansion — 6 November 2026
-
-JobSearch Ghana is the fourth source and runs after the three existing sources. Discovery follows actual next-page links and reads vacancy headings from listing cards. Known roundup/guide headings and navigation links are excluded. Detail extraction requires the visible vacancy header, employer metadata and description. Unrecognized structures are reported as failures, preserving existing data.
-
-The extractor reads visible title, employer, location, category, employment type, posting date and salary wording. It reads clearly labelled deadlines from the main vacancy description only. Hidden JSON-LD salary ranges and validThrough values are not used: inspected pages contained values that were not corroborated by visible vacancy information. Separate application instructions or employer pages may contain additional details that this initial integration does not collect. The source job-detail link remains the application route for readers. Missing dates remain unverified.
-
-Source robots.txt and publicly linked terms were reviewed on 6 November 2026. Public job routes were allowed by the robots rules; the reviewed terms did not state a specific automated-collection restriction. No public data API/feed was verified. A widget link led to a bot-verification page and was not used. Robots rules are checked again on every collection run; authentication or rate-limit blocks are not bypassed.
-
-References:
-- https://www.jobsearchgh.com/robots.txt
-- https://www.jobsearchgh.com/jobs/ghana/terms
-- https://www.jobsearchgh.com/
-
-The first two listing pages and two individual vacancy pages were retrieved during preparation. Thirteen offline tests passed, covering existing data rendering/retention, queue behavior, source limits and new-source parsing. Test fixtures stay outside the published dataset. GitHub-hosted collection still needs a first live run after installation.
-
-Install only refresh_jobs.py and README.md at the repository root. Keep existing workflow, requirements, cloud_run.py, data and logs. Uploading code renders saved records; enable collect on a manual workflow run to collect the fourth source. The update package contains optional tests in validation/; to run them alongside the repository suite, copy their .py files into tests/ and run python -m unittest discover -s tests -v.
+No public GLMIS data API or feed was verified. Public HTML is used, without publishing full job descriptions or any applicant/profile information.

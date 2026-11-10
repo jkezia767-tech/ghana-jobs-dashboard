@@ -40,7 +40,13 @@ SOURCES = {
     }
 }
 
-SOURCES["JobSearch Ghana"] = SOURCES.pop("JobSearch Ghana")
+PAUSED_SOURCES = {"JobSearch Ghana": SOURCES.pop("JobSearch Ghana")}
+SOURCES["GLMIS"] = {
+    "base_url": "https://www.glmis.gov.gh",
+    "listing_url": "https://www.glmis.gov.gh/Jobs/",
+    "delay": 5, "max_pages": 3, "max_details": 50,
+    "time_budget_seconds": 15 * 60
+}
 
 USER_AGENT = "GhanaJobsLearningProject/0.1"
 
@@ -56,6 +62,7 @@ blocked_hosts = set()
 robots_documents = {}
 
 JOB_PATH_PATTERNS = {
+    "GLMIS": r"^/JobPostings/JobDetails/\d+/?$",
     "GhanaCurrentJobs": r"^/job-vacancy-for-[^/]+/?$",
     "JobWeb Ghana": r"^/jobs/[^/]+/?$",
     "JobSearch Ghana": r"^/jobs/\d+/[^/]+/?$",
@@ -269,6 +276,26 @@ def extract_job_record(link, document):
         # validThrough/baseSalary JSON-LD values were not corroborated by visible text.
         # Do not substitute them for a stated application deadline or salary.
         main_text = description.get_text(" ", strip=True)
+
+    elif source == "GLMIS":
+        card = page.select_one(".jd-card")
+        title = card.select_one("#jobTitle") if card else None
+        employer = card.select_one("#employerName") if card else None
+        if not card or not title or not employer or not card.select_one(".jd-section-title"):
+            raise ValueError("Expected GLMIS vacancy structure not found.")
+        record["job_title"] = clean_text(title.get_text(" ", strip=True))
+        record["employer"] = clean_text(employer.get_text(" ", strip=True))
+        for field, selector in [("location", ".fa-map-marker"), ("category", ".fa-building"),
+                                ("employment_type", ".fa-clock")]:
+            icon = card.select_one(".jd-meta " + selector)
+            record[field] = clean_text(icon.parent.get_text(" ", strip=True)) if icon else None
+        if record["employment_type"]:
+            record["employment_type"] = record["employment_type"].split(" . ", 1)[0].strip()
+        if glmis_overseas(record["job_title"] + " " + (record["location"] or "")):
+            raise ValueError("GLMIS advert explicitly indicates overseas work; not imported.")
+        # Relative 'Posted N days ago' is not an exact posting date.
+        # Application/profile form fields are outside this card and never read.
+        main_text = card.get_text(" ", strip=True)
 
     elif source == "BusinessGhana":
         if "Job Category" not in lines or "Job Type" not in lines:
@@ -877,8 +904,8 @@ def source_allows_url(source_name, url):
     if parts.query:
         # Only allow BusinessGhana's observed pagination parameter.
         if (
-            source_name != "BusinessGhana"
-            or parts.path.rstrip("/") != "/site/jobs"
+            (source_name != "BusinessGhana" or parts.path.rstrip("/") != "/site/jobs")
+            and (source_name != "GLMIS" or parts.path.rstrip("/").lower() != "/jobs")
         ):
             return False
 
@@ -896,6 +923,15 @@ def listing_page_number(source_name, url):
     """Recognize only the listing-page routes we inspected."""
     parts = urlsplit(url)
     path = parts.path.rstrip("/") or "/"
+
+    if source_name == "GLMIS":
+        if path.lower() != "/jobs":
+            return None
+        query = parse_qs(parts.query, keep_blank_values=True)
+        if query and (set(query) != {"page"} or len(query["page"]) != 1):
+            return None
+        value = query.get("page", ["1"])[0]
+        return int(value) if value.isdigit() and int(value) > 0 else None
 
     if source_name == "BusinessGhana":
         if path != "/site/jobs":
@@ -923,6 +959,12 @@ def listing_page_number(source_name, url):
         return None
 
     return int(match.group(1)) if match else None
+
+def glmis_overseas(text):
+    # Conservative exclusions for explicit overseas destinations, not agency addresses.
+    return bool(re.search(r"\b(?:bulgaria|europe|qatar|uae|dubai|saudi arabia|kuwait|oman|"
+                          r"overseas|abroad|united kingdom|united states|canada)\b", text, re.I))
+
 
 def jobsearch_roundup(title):
     """Exclude observed job-guide/roundup headings, without excluding role plurals."""
@@ -962,6 +1004,12 @@ def collect_source_links(source_name, refresh=False, max_pages=10, on_page=None,
                 if not re.match(JOB_PATH_PATTERNS[source_name], urlsplit(candidate).path): continue
                 if not source_allows_url(source_name, candidate): continue
                 title = anchor.get_text(' ', strip=True)
+                if source_name == 'GLMIS':
+                    card = anchor.find_parent('div', class_='jv-card')
+                    heading = card.find('h5') if card else None
+                    if not heading: continue
+                    title = heading.get_text(' ', strip=True)
+                    if glmis_overseas(title): continue
                 if source_name == 'JobSearch Ghana' and jobsearch_roundup(title): continue
                 if not title or title.lower() in {'details','view details','read more'}: continue
                 found.setdefault(candidate, {'source': source_name, 'listing_title': title,
@@ -1111,9 +1159,17 @@ def download_source_page(source_name, url, refresh=False):
 def read_rules(source):
     settings = SOURCES[source]
     expected = urlsplit(settings['base_url']).netloc
-    rules = download_page(settings['base_url'] + '/robots.txt', settings['delay'], True,
-                          allowed=lambda u: urlsplit(u).scheme == 'https'
-                          and urlsplit(u).netloc == expected)
+    try:
+        rules = download_page(settings['base_url'] + '/robots.txt', settings['delay'], True,
+                              allowed=lambda u: urlsplit(u).scheme == 'https'
+                              and urlsplit(u).netloc == expected)
+    except requests.HTTPError as error:
+        response = error.response
+        if source != 'GLMIS' or response is None or response.status_code not in (404, 410):
+            raise
+        # Missing robots.txt (RFC 9309 2.3.1.3), not a bypass of 403/429/5xx.
+        rules = {'content_type': 'text/plain', 'text': 'User-agent: *\nAllow: /'}
+        print('GLMIS: robots.txt absent (404/410); public pages only.', flush=True)
     if 'text/html' in rules['content_type'].lower() or '<html' in rules['text'][:500].lower():
         raise ValueError('Could not verify robots.txt; source skipped.')
     parser = RobotFileParser()
@@ -1255,8 +1311,11 @@ def render_with_report(records, report, max_pages):
                  'Only real next-page links are followed. This is not complete website coverage.</p>'
                  '<p>Discovery now allows up to 10 pages per source. Detail checks alternate '
                  'between new jobs and the oldest due rechecks, with up to 200 checks and a '
-                 '40-minute budget per original source. JobSearch Ghana starts with up to 3 listing '
+                 '40-minute budget per original source. GLMIS starts with up to 3 listing '
                  'pages, 50 detail checks and 15 minutes. Waiting links are saved for a later run.</p>'
+                 '<p>JobSearch Ghana is paused after access was refused from GitHub. '
+                 'No requests are sent to that source. GLMIS relative posting dates are left '
+                 'blank; missing deadlines remain unverified. Explicit overseas adverts are excluded.</p>'
                  '<p>Recheck intervals: within a listed deadline, 20 hours; missing/conflicting '
                  'deadlines, 3 days; expired deadlines or unavailable pages, 7 days; failed '
                  'requests, 20 hours. Not due yet means no download was needed this run. '
