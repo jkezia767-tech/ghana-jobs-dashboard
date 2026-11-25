@@ -1,5 +1,5 @@
 {
-  "attempted_at_utc": "2026-11-24T20:30:28.657234+00:00",
+  "attempted_at_utc": "2026-11-25T19:46:29.163876+00:00",
   "max_pages": 10,
   "max_details_per_source": 200,
   "source_time_budget_seconds": 2400,
@@ -7,375 +7,98 @@
     {
       "source": "GhanaCurrentJobs",
       "discovered": 198,
-      "updated": 200,
-      "new_records": 5,
+      "updated": 178,
+      "new_records": 9,
       "failed": 0,
       "unavailable": 0,
-      "deferred": 68,
-      "queued": 39,
-      "attempted": 200,
+      "deferred": 138,
+      "queued": 0,
+      "attempted": 178,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-24T20:42:54.968778+00:00",
+      "last_success_utc": "2026-11-25T19:57:26.683237+00:00",
+      "page_limit": 10,
+      "detail_limit": 200,
+      "time_budget_seconds": 2400,
+      "discovery_stop": "Page limit reached",
+      "result": "Success within selected scope",
+      "last_successful_download_utc": "2026-11-25T19:57:26.645573+00:00"
+    },
+    {
+      "source": "JobWeb Ghana",
+      "discovered": 100,
+      "updated": 52,
+      "new_records": 0,
+      "failed": 0,
+      "unavailable": 0,
+      "deferred": 113,
+      "queued": 0,
+      "attempted": 52,
+      "pages_checked": 10,
+      "last_success_utc": "2026-11-25T20:00:46.378922+00:00",
+      "page_limit": 10,
+      "detail_limit": 200,
+      "time_budget_seconds": 2400,
+      "discovery_stop": "Page limit reached",
+      "result": "Success within selected scope",
+      "last_successful_download_utc": "2026-11-25T20:00:46.331446+00:00"
+    },
+    {
+      "source": "BusinessGhana",
+      "discovered": 491,
+      "updated": 196,
+      "new_records": 3,
+      "failed": 0,
+      "unavailable": 3,
+      "deferred": 326,
+      "queued": 237,
+      "attempted": 199,
+      "pages_checked": 10,
+      "last_success_utc": "2026-11-25T20:37:38.523156+00:00",
       "page_limit": 10,
       "detail_limit": 200,
       "time_budget_seconds": 2400,
       "discovery_stop": "Page limit reached",
       "result": "Completed within limits; queue remains",
-      "last_successful_download_utc": "2026-11-24T20:42:54.927659+00:00"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "discovered": 60,
-      "updated": 91,
-      "new_records": 3,
-      "failed": 25,
-      "unavailable": 0,
-      "deferred": 50,
-      "queued": 0,
-      "attempted": 115,
-      "pages_checked": 6,
-      "last_success_utc": "2026-11-22T17:46:21.773876+00:00",
-      "page_limit": 10,
-      "detail_limit": 200,
-      "time_budget_seconds": 2400,
-      "discovery_stop": "Listing request/structure failed",
-      "result": "Partial",
-      "last_successful_download_utc": "2026-11-24T20:59:48.259483+00:00"
-    },
-    {
-      "source": "BusinessGhana",
-      "discovered": 493,
-      "updated": 94,
-      "new_records": 7,
-      "failed": 21,
-      "unavailable": 3,
-      "deferred": 435,
-      "queued": 206,
-      "attempted": 118,
-      "pages_checked": 10,
-      "last_success_utc": "2026-11-23T22:45:07.007139+00:00",
-      "page_limit": 10,
-      "detail_limit": 200,
-      "time_budget_seconds": 2400,
-      "discovery_stop": "Page limit reached",
-      "detail_stop": "Source time budget reached",
-      "result": "Partial",
-      "last_successful_download_utc": "2026-11-24T21:34:26.995826+00:00"
+      "last_successful_download_utc": "2026-11-25T20:37:38.477653+00:00"
     },
     {
       "source": "GLMIS",
       "discovered": 26,
-      "updated": 2,
-      "new_records": 2,
+      "updated": 0,
+      "new_records": 0,
       "failed": 7,
       "unavailable": 0,
-      "deferred": 29,
+      "deferred": 31,
       "queued": 0,
-      "attempted": 9,
+      "attempted": 7,
       "pages_checked": 3,
       "last_success_utc": "Never recorded",
       "page_limit": 3,
       "detail_limit": 50,
       "time_budget_seconds": 900,
       "discovery_stop": "Page limit reached",
-      "result": "Partial",
+      "result": "Failed",
       "last_successful_download_utc": "2026-11-24T21:41:21.524183+00:00"
     }
   ],
   "errors": [
     {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/page/7/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/page/7/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/head-markets-exports-farmerline-group/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/head-markets-exports-farmerline-group/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/field-officer-opal-micro-credit/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/field-officer-opal-micro-credit/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/internal-auditor-west-end-university-college-weuc/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/internal-auditor-west-end-university-college-weuc/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/senior-administrative-assistant-west-end-university-college-weuc/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/senior-administrative-assistant-west-end-university-college-weuc/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/facilities-officer-west-end-university-college-weuc/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/facilities-officer-west-end-university-college-weuc/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/senior-lecturers-west-end-university-college-weuc/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/senior-lecturers-west-end-university-college-weuc/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/associate-professors-west-end-university-college-weuc/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/associate-professors-west-end-university-college-weuc/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/senior-supervisor-mantrac-ghana-ltd/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/senior-supervisor-mantrac-ghana-ltd/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/front-desk-executive-night-shift-somewhere-nice/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/front-desk-executive-night-shift-somewhere-nice/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/regional-sales-representative-yara-ghana/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/regional-sales-representative-yara-ghana/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/director-human-resource-management-komfo-ankye-teaching-hospital/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/director-human-resource-management-komfo-ankye-teaching-hospital/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/agent-merchant-aggregator-manager-sao-ghana/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/agent-merchant-aggregator-manager-sao-ghana/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/head-engineering-reputable-company/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/head-engineering-reputable-company/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/deputy-director-reputable-company/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/deputy-director-reputable-company/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/analyst-enterprise-channel-reporting-analytics-mtn/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/analyst-enterprise-channel-reporting-analytics-mtn/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/anti-money-laundering-officer-amlo-sao-ghana-2/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/anti-money-laundering-officer-amlo-sao-ghana-2/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/cad-designer-machine-operator-les-ann-laser/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/cad-designer-machine-operator-les-ann-laser/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/credit-recovery-officers-dara-capital/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/credit-recovery-officers-dara-capital/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/fixed-base-management-commercial-performance-manager-telecel/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/fixed-base-management-commercial-performance-manager-telecel/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/health-administrator-human-resource-manager-reputable-company/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/health-administrator-human-resource-manager-reputable-company/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/operations-manager-sao-ghana/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/operations-manager-sao-ghana/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/supervisor-crane-newmont/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/supervisor-crane-newmont/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/manager-home-customer-management-mtn/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/manager-home-customer-management-mtn/",
-      "kind": "request_failed"
-    },
-    {
-      "source": "JobWeb Ghana",
-      "url": "https://jobwebghana.com/jobs/senior-manager-home-planning-design-mtn/",
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/senior-manager-home-planning-design-mtn/",
-      "kind": "request_failed"
-    },
-    {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/other-healthcare-jobs/494443/HR-Admin-Officer",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/other-healthcare-jobs/494443/HR-Admin-Officer",
+      "url": "https://www.businessghana.com/site/jobs/sales-executive-jobs/493996/Sales-Executive",
+      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/sales-executive-jobs/493996/Sales-Executive",
       "kind": "page_unavailable"
     },
     {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/436061/RF-IT-Technicians",
-      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Read timed out. (read timeout=40)",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/sales-manager-jobs/494660/Regional-Sales-Manager-Kumasi-Tamale",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/sales-manager-jobs/494660/Regional-Sales-Manager-Kumasi-Tamale",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/media-manager-jobs/494481/Social-media-Officer-Female",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/media-manager-jobs/494481/Social-media-Officer-Female",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/other-security-jobs/494491/Risk-Analyst-Officer",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-security-jobs/494491/Risk-Analyst-Officer",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/videographer-jobs/494482/Videographer",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/videographer-jobs/494482/Videographer",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/construction-engineer-jobs/494796/Earthworks-Site-Manager",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/construction-engineer-jobs/494796/Earthworks-Site-Manager",
+      "url": "https://www.businessghana.com/site/jobs/software-engineer-jobs/435953/Apprentices-Wanted-Techno-Solutions-Limited",
+      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/software-engineer-jobs/435953/Apprentices-Wanted-Techno-Solutions-Limited",
       "kind": "page_unavailable"
     },
     {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/construction-manager-jobs/494804/Earthworks-Foreman",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/construction-manager-jobs/494804/Earthworks-Foreman",
+      "url": "https://www.businessghana.com/site/jobs/other-jobs-/494893/Tiktok-Manager",
+      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/other-jobs-/494893/Tiktok-Manager",
       "kind": "page_unavailable"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/construction-manager-jobs/494808/Quality-Manager",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/construction-manager-jobs/494808/Quality-Manager",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/cook-jobs/315490/Cook-needed-urgently",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/cook-jobs/315490/Cook-needed-urgently",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/account-executive-jobs/494235/Supermarket-Sales-Account-Executive",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/account-executive-jobs/494235/Supermarket-Sales-Account-Executive",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/media-assistant-jobs/494432/Creative-Lead",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/media-assistant-jobs/494432/Creative-Lead",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/executive-management-jobs/494844/Senior-Executive-Assistant",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/executive-management-jobs/494844/Senior-Executive-Assistant",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/other-jobs-/494269/Debt-Collector",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-jobs-/494269/Debt-Collector",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/human-resources-manager-jobs/461608/Human-Resource-Manager",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/human-resources-manager-jobs/461608/Human-Resource-Manager",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/human-resources-manager-jobs/494838/HR-Manager",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/human-resources-manager-jobs/494838/HR-Manager",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/494841/Trainee-IT-Field-Engineer",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/it-support-jobs/494841/Trainee-IT-Field-Engineer",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/494842/Data-Entry-Officer",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/it-support-jobs/494842/Data-Entry-Officer",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/marketer-jobs/494648/Marketers-needed-urgently",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/marketer-jobs/494648/Marketers-needed-urgently",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/other-it-jobs/494839/Videographer-Video-Editor-Digital-Marketing",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-it-jobs/494839/Videographer-Video-Editor-Digital-Marketing",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/sales-executive-jobs/494840/Marketing-Sales-Executive",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/sales-executive-jobs/494840/Marketing-Sales-Executive",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/sales-executive-jobs/494642/Sales-and-Marketing-Executive-Accra",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/sales-executive-jobs/494642/Sales-and-Marketing-Executive-Accra",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/sales-representative-jobs/447906/Sales-Marketing-Reps",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/sales-representative-jobs/447906/Sales-Marketing-Reps",
-      "kind": "request_failed"
-    },
-    {
-      "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/other-education-jobs/494067/National-Service-NSS-School-Tarkwa-W-R",
-      "error": "500 Server Error: Internal Server Error for url: https://www.businessghana.com/site/jobs/other-education-jobs/494067/National-Service-NSS-School-Tarkwa-W-R",
-      "kind": "request_failed"
     },
     {
       "source": "GLMIS",
@@ -420,7 +143,7 @@
       "kind": "request_failed"
     }
   ],
-  "finished_at_utc": "2026-11-24T21:41:21.574733+00:00",
+  "finished_at_utc": "2026-11-25T20:38:30.631971+00:00",
   "pagination": [
     {
       "source": "GhanaCurrentJobs",
@@ -570,16 +293,44 @@
       "source": "JobWeb Ghana",
       "page": 7,
       "url": "https://jobwebghana.com/jobs/page/7/",
-      "result": "Listing request/structure failed",
-      "downloaded": false,
-      "error": "500 Server Error: Internal Server Error for url: https://jobwebghana.com/jobs/page/7/"
+      "new_unique_links": 10,
+      "total_unique_links": 70,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 8,
+      "url": "https://jobwebghana.com/jobs/page/8/",
+      "new_unique_links": 10,
+      "total_unique_links": 80,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 9,
+      "url": "https://jobwebghana.com/jobs/page/9/",
+      "new_unique_links": 10,
+      "total_unique_links": 90,
+      "result": "Continue",
+      "downloaded": true
+    },
+    {
+      "source": "JobWeb Ghana",
+      "page": 10,
+      "url": "https://jobwebghana.com/jobs/page/10/",
+      "new_unique_links": 10,
+      "total_unique_links": 100,
+      "result": "Page limit reached",
+      "downloaded": true
     },
     {
       "source": "BusinessGhana",
       "page": 1,
       "url": "https://www.businessghana.com/site/jobs",
-      "new_unique_links": 75,
-      "total_unique_links": 75,
+      "new_unique_links": 84,
+      "total_unique_links": 84,
       "result": "Continue",
       "downloaded": true
     },
@@ -587,8 +338,8 @@
       "source": "BusinessGhana",
       "page": 2,
       "url": "https://www.businessghana.com/site/jobs?page=2",
-      "new_unique_links": 44,
-      "total_unique_links": 119,
+      "new_unique_links": 38,
+      "total_unique_links": 122,
       "result": "Continue",
       "downloaded": true
     },
@@ -596,8 +347,8 @@
       "source": "BusinessGhana",
       "page": 3,
       "url": "https://www.businessghana.com/site/jobs?page=3",
-      "new_unique_links": 43,
-      "total_unique_links": 162,
+      "new_unique_links": 46,
+      "total_unique_links": 168,
       "result": "Continue",
       "downloaded": true
     },
@@ -605,8 +356,8 @@
       "source": "BusinessGhana",
       "page": 4,
       "url": "https://www.businessghana.com/site/jobs?page=4",
-      "new_unique_links": 49,
-      "total_unique_links": 211,
+      "new_unique_links": 46,
+      "total_unique_links": 214,
       "result": "Continue",
       "downloaded": true
     },
@@ -614,8 +365,8 @@
       "source": "BusinessGhana",
       "page": 5,
       "url": "https://www.businessghana.com/site/jobs?page=5",
-      "new_unique_links": 46,
-      "total_unique_links": 257,
+      "new_unique_links": 47,
+      "total_unique_links": 261,
       "result": "Continue",
       "downloaded": true
     },
@@ -623,8 +374,8 @@
       "source": "BusinessGhana",
       "page": 6,
       "url": "https://www.businessghana.com/site/jobs?page=6",
-      "new_unique_links": 46,
-      "total_unique_links": 303,
+      "new_unique_links": 44,
+      "total_unique_links": 305,
       "result": "Continue",
       "downloaded": true
     },
@@ -632,8 +383,8 @@
       "source": "BusinessGhana",
       "page": 7,
       "url": "https://www.businessghana.com/site/jobs?page=7",
-      "new_unique_links": 45,
-      "total_unique_links": 348,
+      "new_unique_links": 46,
+      "total_unique_links": 351,
       "result": "Continue",
       "downloaded": true
     },
@@ -641,8 +392,8 @@
       "source": "BusinessGhana",
       "page": 8,
       "url": "https://www.businessghana.com/site/jobs?page=8",
-      "new_unique_links": 49,
-      "total_unique_links": 397,
+      "new_unique_links": 44,
+      "total_unique_links": 395,
       "result": "Continue",
       "downloaded": true
     },
@@ -650,8 +401,8 @@
       "source": "BusinessGhana",
       "page": 9,
       "url": "https://www.businessghana.com/site/jobs?page=9",
-      "new_unique_links": 47,
-      "total_unique_links": 444,
+      "new_unique_links": 48,
+      "total_unique_links": 443,
       "result": "Continue",
       "downloaded": true
     },
@@ -659,8 +410,8 @@
       "source": "BusinessGhana",
       "page": 10,
       "url": "https://www.businessghana.com/site/jobs?page=10",
-      "new_unique_links": 49,
-      "total_unique_links": 493,
+      "new_unique_links": 48,
+      "total_unique_links": 491,
       "result": "Page limit reached",
       "downloaded": true
     },
