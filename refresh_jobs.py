@@ -558,7 +558,7 @@ a{color:#007569;font-weight:bold}
 <main>
 <h1>Ghana Jobs Dashboard</h1>
 <p class="note">
-Collected listings from three sources. This is not a
+Collected listings from the sources shown below. This is not a
 complete survey of Ghana's job market. A future deadline does not confirm
 that applications are still being accepted.
 </p>
@@ -615,6 +615,10 @@ that applications are still being accepted.
 
 <div class="panel">
 <h2>Matching listings</h2>
+<label class="check"><input id="groupConfirmed" type="checkbox" checked> Group confirmed duplicates</label>
+<p id="groupSummary" class="note"></p>
+<p class="note">Grouping applies to this table. Counts, charts and CSV downloads retain individual source records.
+Only reviewed adverts are grouped. Filters apply before grouping; expand a group to see each matching record.</p>
 <p class="note">Possible duplicate flags require review. Records with unknown
 employers cannot be reliably matched across websites.</p>
 <div id="empty" hidden>No listings match these filters.</div>
@@ -665,6 +669,26 @@ function currentJobs(){
     else job.status = "Within listed deadline — open status unverified";
     return job;
   });
+}
+
+// Reviewed by the dashboard owner: the same advert on three exact URLs.
+// The deadline guard prevents grouping a later campaign that reuses a URL.
+const confirmedNurseUrls = new Set([
+  "https://www.ghanacurrentjobs.com/job-vacancy-for-nurses-assistant-nurses/",
+  "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre/",
+  "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre-2/"
+]);
+function groupConfirmedJobs(jobs, enabled){
+  const groups = new Map();
+  jobs.forEach((job, index) => {
+    const confirmed = enabled && confirmedNurseUrls.has(job.job_url)
+      && job.application_deadline === "2026-12-10"
+      && String(job.job_title).trim().toLowerCase() === "nurses / assistant nurses";
+    const key = confirmed ? "reviewed-nurses-2026-12-10" : "record-" + index;
+    if(!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(job);
+  });
+  return [...groups.values()];
 }
 
 function populateSelect(id, jobs){
@@ -770,35 +794,62 @@ function render(){
   el("rows").replaceChildren();
   el("empty").hidden = filtered.length !== 0;
 
-  filtered.forEach(job => {
+  const displayGroups = groupConfirmedJobs(filtered, el("groupConfirmed").checked);
+  el("groupSummary").textContent = displayGroups.length + " table entries from " + filtered.length +
+    " matching source records. " + displayGroups.filter(group => group.length > 1).length +
+    " confirmed duplicate groups combined.";
+  displayGroups.forEach(members => {
+    const job = members.find(item => item.employer) || members[0];
     const row = document.createElement("tr");
     for(const field of [
       "job_title","employer","location","employment_type",
       "application_deadline","status","source","page_availability","last_checked_utc","next_check_utc"
     ]){
       const cell = document.createElement("td");
-      cell.textContent = text(job[field]);
+      cell.textContent = members.length > 1
+        ? [...new Set(members.map(item => text(item[field])))].join(" / ")
+        : text(job[field]);
       if(field === "location" && job.location_detail)
         cell.title = String(job.location_detail);
       row.append(cell);
     }
     const duplicate = document.createElement("td");
-    duplicate.textContent = job.possible_cross_site_duplicate ? "Review" : "—";
+    duplicate.textContent = members.length > 1 ? "Confirmed same advert (" + members.length + " records)"
+      : job.possible_cross_site_duplicate ? "Review" : "—";
     row.append(duplicate);
 
     const linkCell = document.createElement("td");
+    const details = document.createElement("details");
+    if(members.length > 1){
+      const summary = document.createElement("summary");
+      summary.textContent = "View " + members.length + " original listings";
+      details.append(summary);
+      linkCell.append(details);
+    }
+    members.forEach(member => {
+    const entry = document.createElement("p");
     try{
-      const url = new URL(job.job_url);
+      const url = new URL(member.job_url);
       if(!["https:","http:"].includes(url.protocol)) throw Error("Invalid link");
       const link = document.createElement("a");
       link.href = url.href;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      link.textContent = "View listing";
-      linkCell.append(link);
+      link.textContent = members.length > 1 ? member.source + " — View listing" : "View listing";
+      entry.append(link);
+      if(members.length > 1){
+        const note = document.createElement("span");
+        note.textContent = " | Employer: " + text(member.employer) + " | Location: " + text(member.location)
+          + " | Posted: " + text(member.date_posted) + " | Deadline: " + text(member.application_deadline)
+          + " | Status: " + text(member.status) + " | Page: " + text(member.page_availability)
+          + " | Collected UTC: " + text(member.collected_at_utc);
+        entry.append(note);
+      }
     }catch{
-      linkCell.textContent = "Unavailable";
+      entry.textContent = "Unavailable";
     }
+    (members.length > 1 ? details : linkCell).append(entry);
+    });
     row.append(linkCell);
     el("rows").append(row);
   });
@@ -821,7 +872,7 @@ countsBy(rawJobs, "source").forEach(([source, count]) => {
 
 el("search").addEventListener("input", render);
 ["source","location","category","employment_type","status",
- "includeExpired","chartGroup","sort"].forEach(id =>
+ "includeExpired","groupConfirmed","chartGroup","sort"].forEach(id =>
     el(id).addEventListener("change", render)
 );
 
@@ -830,6 +881,7 @@ el("reset").addEventListener("click", () => {
   ["source","location","category","employment_type","status"]
     .forEach(id => el(id).value = "");
   el("includeExpired").checked = false;
+  el("groupConfirmed").checked = true;
   render();
 });
 
