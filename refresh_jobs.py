@@ -671,20 +671,318 @@ function currentJobs(){
   });
 }
 
-// Reviewed by the dashboard owner: the same advert on three exact URLs.
-// The deadline guard prevents grouping a later campaign that reuses a URL.
-const confirmedNurseUrls = new Set([
-  "https://www.ghanacurrentjobs.com/job-vacancy-for-nurses-assistant-nurses/",
-  "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre/",
-  "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre-2/"
-]);
+// Reviewed 2026-11-26 against original adverts (plus owner confirmation).
+// Exact URLs, source, title and deadline guard against later advert reuse.
+// Never infer a confirmed group from a generic job title alone.
+const confirmedDuplicateGroups = [
+  {
+    "id": "reviewed-2026-11-26-3",
+    "title": "Assistant Branch Manager",
+    "deadline": "2026-11-27",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-assistant-branch-manager-2/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/assistant-branch-manager-edward-mensah-wood-associated-ltd/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-4",
+    "title": "Assistant Industrial Services Engineer",
+    "deadline": "2026-12-01",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-assistant-industrial-services-engineer/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/assistant-industrial-services-engineer-reputable-company/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-6",
+    "title": "Creative Graphic Designer",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-creative-graphic-designer/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/creative-graphic-designer-ankacepts/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-8",
+    "title": "Dedicated & Qualified Teachers",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-dedicated-qualified-teachers/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/dedicated-qualified-teachers-oakbridge-international-school/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-12",
+    "title": "Finance Director",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-finance-director-4/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/finance-director-emwa-insurance-brokers/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-13",
+    "title": "Group Marketing Director",
+    "deadline": "2026-12-02",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-group-marketing-director/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/group-marketing-director-tobinco-pharmaceuticals-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-14",
+    "title": "Head of Internal Audit",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-of-internal-audit-15/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/head-internal-audit-airport-clinic-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-15",
+    "title": "Head of Medical Sales & Field Force (Medical Representatives)",
+    "deadline": "2026-12-02",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-of-medical-sales-field-force-medical-representatives/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/head-medical-sales-field-force-medical-representatives-tobinco-pharmaceuticals-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-16",
+    "title": "Head of Origination and Structuring",
+    "deadline": "2026-12-10",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-of-origination-and-structuring/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/head-origination-structuring-development-bank-ghana/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-17",
+    "title": "Head of Procurement",
+    "deadline": "2026-12-10",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-of-procurement/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/head-procurement-development-bank-ghana/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-18",
+    "title": "Head Patternmaker & Atelier Manager",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-patternmaker-atelier-manager-2/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-head-patternmaker-atelier-manager/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/head-patternmaker-atelier-manager-lempoche-couture/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-20",
+    "title": "Manager, Origination and Structuring",
+    "deadline": "2026-12-10",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-manager-origination-and-structuring/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/manager-origination-structuring-development-bank-ghana/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-23",
+    "title": "Nurses / Assistant Nurses",
+    "deadline": "2026-12-10",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-nurses-assistant-nurses/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre-2/",
+        "source": "JobWeb Ghana"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/nurses-assistant-nurses-sweden-ghana-medical-centre/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-24",
+    "title": "Oncology Nurse",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-oncology-nurse/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/oncology-nurse-sweden-ghana-medical-centre/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-26",
+    "title": "Product Development Manager",
+    "deadline": "2026-11-30",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-product-development-manager/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/product-development-manager-lempoche-couture/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-27",
+    "title": "Product Development Manager (Pharmacist)",
+    "deadline": "2026-12-02",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-product-development-manager-pharmacist/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/product-development-manager-pharmacist-tobinco-pharmaceuticals-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-28",
+    "title": "Product Manager",
+    "deadline": "2026-12-02",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-product-manager-2/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/product-manager-tobinco-pharmaceuticals-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-31",
+    "title": "Regulatory Affairs Pharmacist",
+    "deadline": "2026-12-02",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-regulatory-affairs-pharmacist-2/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/regulatory-affairs-pharmacist-tobinco-pharmaceuticals-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  },
+  {
+    "id": "reviewed-2026-11-26-35",
+    "title": "Senior Manager, Database Administration",
+    "deadline": "2026-12-10",
+    "members": [
+      {
+        "url": "https://www.ghanacurrentjobs.com/job-vacancy-for-senior-manager-database-administration/",
+        "source": "GhanaCurrentJobs"
+      },
+      {
+        "url": "https://jobwebghana.com/jobs/senior-manager-database-administration-prudential-bank-limited/",
+        "source": "JobWeb Ghana"
+      }
+    ]
+  }
+];
+const normalizedTitle = value => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+const confirmedByUrl = new Map();
+confirmedDuplicateGroups.forEach(group => group.members.forEach(member => {
+  if(confirmedByUrl.has(member.url)) throw Error("Duplicate review URL assigned twice");
+  confirmedByUrl.set(member.url, {...member, group});
+}));
 function groupConfirmedJobs(jobs, enabled){
   const groups = new Map();
   jobs.forEach((job, index) => {
-    const confirmed = enabled && confirmedNurseUrls.has(job.job_url)
-      && job.application_deadline === "2026-12-10"
-      && String(job.job_title).trim().toLowerCase() === "nurses / assistant nurses";
-    const key = confirmed ? "reviewed-nurses-2026-12-10" : "record-" + index;
+    const match = enabled ? confirmedByUrl.get(job.job_url) : null;
+    const confirmed = match && job.source === match.source
+      && job.application_deadline === match.group.deadline
+      && normalizedTitle(job.job_title) === normalizedTitle(match.group.title);
+    const key = confirmed ? match.group.id : "record-" + index;
     if(!groups.has(key)) groups.set(key, []);
     groups.get(key).push(job);
   });
@@ -795,9 +1093,9 @@ function render(){
   el("empty").hidden = filtered.length !== 0;
 
   const displayGroups = groupConfirmedJobs(filtered, el("groupConfirmed").checked);
-  el("groupSummary").textContent = displayGroups.length + " table entries from " + filtered.length +
+  el("groupSummary").textContent = displayGroups.length + (displayGroups.length === 1 ? " table entry from " : " table entries from ") + filtered.length +
     " matching source records. " + displayGroups.filter(group => group.length > 1).length +
-    " confirmed duplicate groups combined.";
+    " confirmed duplicate group(s) combined.";
   displayGroups.forEach(members => {
     const job = members.find(item => item.employer) || members[0];
     const row = document.createElement("tr");
