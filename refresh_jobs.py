@@ -130,6 +130,10 @@ def labelled_value(lines, label, other_labels):
 
     return None
 
+class ExcludedVacancy(ValueError):
+    """An intentional scope exclusion, not a failed download."""
+
+
 def extract_job_record(link, document):
     source = link["source"]
     page = BeautifulSoup(document["text"], "html.parser")
@@ -292,7 +296,7 @@ def extract_job_record(link, document):
         if record["employment_type"]:
             record["employment_type"] = record["employment_type"].split(" . ", 1)[0].strip()
         if glmis_overseas(record["job_title"] + " " + (record["location"] or "")):
-            raise ValueError("GLMIS advert explicitly indicates overseas work; not imported.")
+            raise ExcludedVacancy("GLMIS advert explicitly indicates overseas work; not imported.")
         # Relative 'Posted N days ago' is not an exact posting date.
         # Application/profile form fields are outside this card and never read.
         main_text = card.get_text(" ", strip=True)
@@ -1299,7 +1303,7 @@ def render_with_report(records, report, max_pages):
         content = page.read_text(encoding='utf-8')
         fields = [('source','Source'), ('result','Result'), ('pages_checked','Pages checked'),
                   ('discovered','Discovered links'), ('updated','Updated'), ('new_records','New records'),
-                  ('unavailable','Unavailable'), ('deferred','Not due yet'),
+                  ('unavailable','Unavailable'), ('excluded','Excluded after detail check'), ('deferred','Not due yet'),
                   ('queued','Waiting for next run'), ('failed','Failed'),
                   ('last_successful_download_utc','Last successful download UTC')]
         rows = ''.join('<tr>' + ''.join('<td>' + html.escape(str(row.get(k, '—'))) + '</td>'
@@ -1315,7 +1319,9 @@ def render_with_report(records, report, max_pages):
                  'pages, 50 detail checks and 15 minutes. Waiting links are saved for a later run.</p>'
                  '<p>JobSearch Ghana is paused after access was refused from GitHub. '
                  'No requests are sent to that source. GLMIS relative posting dates are left '
-                 'blank; missing deadlines remain unverified. Explicit overseas adverts are excluded.</p>'
+                 'blank; missing deadlines remain unverified. Explicit overseas adverts are excluded. '
+                 'Exclusions after detail checks are reported separately from failures and '
+                 'rechecked after seven days; adverts filtered on listing pages are not in that count.</p>'
                  '<p>Recheck intervals: within a listed deadline, 20 hours; missing/conflicting '
                  'deadlines, 3 days; expired deadlines or unavailable pages, 7 days; failed '
                  'requests, 20 hours. Not due yet means no download was needed this run. '
@@ -1339,7 +1345,7 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
     last_success = {r['source']: r.get('last_success_utc', 'Never recorded') for r in previous.get('sources', [])}
     started = datetime.now(timezone.utc).isoformat()
     report = {'attempted_at_utc': started, 'max_pages': max_pages, 'max_details_per_source': MAX_DETAILS_PER_SOURCE,
-              'source_time_budget_seconds': SOURCE_TIME_BUDGET_SECONDS, 'sources': [], 'errors': []}
+              'source_time_budget_seconds': SOURCE_TIME_BUDGET_SECONDS, 'sources': [], 'errors': [], 'exclusions': []}
     stamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')
     links = {(r['source'], canonical_url(r['job_url'])): r for r in saved_links.to_dict('records')}
     for r in records.to_dict('records'):
@@ -1378,7 +1384,7 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
         config = SOURCES[source]
         source_deadline = time.monotonic() + config.get("time_budget_seconds", SOURCE_TIME_BUDGET_SECONDS)
         row = {'source': source, 'discovered': 0, 'updated': 0, 'new_records': 0, 'failed': 0,
-               'unavailable': 0, 'deferred': 0, 'queued': 0, 'attempted': 0, 'pages_checked': 0,
+               'unavailable': 0, 'excluded': 0, 'deferred': 0, 'queued': 0, 'attempted': 0, 'pages_checked': 0,
                'last_success_utc': last_success.get(source, 'Never recorded')}
         row.update(page_limit=min(max_pages, config.get('max_pages', max_pages)),
                    detail_limit=config.get('max_details', MAX_DETAILS_PER_SOURCE),
@@ -1448,6 +1454,16 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
                                          last_http_status=200, resolved_job_url=record['job_url'])
                     row['updated'] += 1
                     row['new_records'] += int(is_new)
+                except ExcludedVacancy as error:
+                    checked = datetime.now(timezone.utc)
+                    link.update(page_availability='Excluded — outside Ghana scope',
+                                exclusion_reason=str(error), last_checked_utc=checked.isoformat(),
+                                next_check_utc=(checked+timedelta(days=7)).isoformat(),
+                                last_http_status=200)
+                    row['excluded'] += 1
+                    report['exclusions'].append({'source': source, 'url': link['job_url'],
+                                                 'reason': str(error)})
+                    print('  Excluded:', str(error), flush=True)
                 except (requests.RequestException, ValueError, RuntimeError) as error:
                     kind, code = failure_kind(error)
                     checked = datetime.now(timezone.utc)
@@ -1464,7 +1480,8 @@ def refresh(max_pages=DEFAULT_MAX_PAGES):
         row['result'] = ('Partial' if row['failed'] and row['updated'] else
                          'Failed' if row['failed'] else 'Completed within limits; queue remains' if row['queued'] else
                          'Completed with unavailable pages' if row['unavailable'] else
-                         'Success within selected scope' if row['updated'] else 'No detail pages due')
+                         'Success within selected scope' if row['updated'] else
+                         'Completed with scope exclusions' if row['excluded'] else 'No detail pages due')
         if not row['failed']:
             row['last_success_utc'] = datetime.now(timezone.utc).isoformat()
         subset = records[records['source'] == source] if not records.empty else records
