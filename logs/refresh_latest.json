@@ -1,107 +1,198 @@
 {
-  "attempted_at_utc": "2026-11-26T19:25:56.971087+00:00",
+  "attempted_at_utc": "2026-11-27T19:21:40.992074+00:00",
   "max_pages": 10,
   "max_details_per_source": 200,
   "source_time_budget_seconds": 2400,
   "sources": [
     {
       "source": "GhanaCurrentJobs",
-      "discovered": 195,
-      "updated": 5,
-      "new_records": 1,
+      "discovered": 198,
+      "updated": 129,
+      "new_records": 14,
       "failed": 0,
       "unavailable": 0,
       "excluded": 0,
-      "deferred": 314,
+      "deferred": 204,
       "queued": 0,
-      "attempted": 5,
+      "attempted": 129,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-26T19:26:51.736645+00:00",
+      "last_success_utc": "2026-11-27T19:29:54.355581+00:00",
       "page_limit": 10,
       "detail_limit": 200,
       "time_budget_seconds": 2400,
       "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-26T19:26:51.683663+00:00"
+      "last_successful_download_utc": "2026-11-27T19:29:54.292860+00:00"
     },
     {
       "source": "JobWeb Ghana",
       "discovered": 100,
-      "updated": 3,
+      "updated": 54,
       "new_records": 0,
       "failed": 0,
       "unavailable": 0,
       "excluded": 0,
-      "deferred": 163,
+      "deferred": 112,
       "queued": 0,
-      "attempted": 3,
+      "attempted": 54,
       "pages_checked": 10,
-      "last_success_utc": "2026-11-26T19:27:33.578093+00:00",
+      "last_success_utc": "2026-11-27T19:33:20.899980+00:00",
       "page_limit": 10,
       "detail_limit": 200,
       "time_budget_seconds": 2400,
       "discovery_stop": "Page limit reached",
       "result": "Success within selected scope",
-      "last_successful_download_utc": "2026-11-26T19:27:33.511479+00:00"
+      "last_successful_download_utc": "2026-11-27T19:33:20.830133+00:00"
     },
     {
       "source": "BusinessGhana",
-      "discovered": 485,
-      "updated": 51,
-      "new_records": 0,
-      "failed": 0,
+      "discovered": 496,
+      "updated": 133,
+      "new_records": 17,
+      "failed": 15,
       "unavailable": 1,
       "excluded": 0,
-      "deferred": 728,
-      "queued": 0,
-      "attempted": 52,
+      "deferred": 453,
+      "queued": 195,
+      "attempted": 149,
       "pages_checked": 10,
       "last_success_utc": "2026-11-26T19:40:53.889028+00:00",
       "page_limit": 10,
       "detail_limit": 200,
       "time_budget_seconds": 2400,
       "discovery_stop": "Page limit reached",
-      "result": "Completed with unavailable pages",
-      "last_successful_download_utc": "2026-11-26T19:40:53.826424+00:00"
+      "detail_stop": "Source time budget reached",
+      "result": "Partial",
+      "last_successful_download_utc": "2026-11-27T20:00:22.387873+00:00"
     },
     {
       "source": "GLMIS",
       "discovered": 26,
-      "updated": 0,
+      "updated": 29,
       "new_records": 0,
       "failed": 0,
       "unavailable": 0,
       "excluded": 0,
-      "deferred": 38,
+      "deferred": 9,
       "queued": 0,
-      "attempted": 0,
+      "attempted": 29,
       "pages_checked": 3,
-      "last_success_utc": "2026-11-26T19:41:10.279254+00:00",
+      "last_success_utc": "2026-11-27T20:16:32.899697+00:00",
       "page_limit": 3,
       "detail_limit": 50,
       "time_budget_seconds": 900,
       "discovery_stop": "Page limit reached",
-      "result": "No detail pages due",
-      "last_successful_download_utc": "2026-11-24T21:41:21.524183+00:00"
+      "result": "Success within selected scope",
+      "last_successful_download_utc": "2026-11-27T20:16:32.834720+00:00"
     }
   ],
   "errors": [
     {
       "source": "BusinessGhana",
-      "url": "https://www.businessghana.com/site/jobs/teacher-jobs/494459/Preschool-Teacher-needed-at-Mobole-Afienya-Dodowa-Rd",
-      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/teacher-jobs/494459/Preschool-Teacher-needed-at-Mobole-Afienya-Dodowa-Rd",
+      "url": "https://www.businessghana.com/site/jobs/other-healthcare-jobs/494451/HR-Admin-Manager",
+      "error": "404 Client Error: Not Found for url: https://www.businessghana.com/site/jobs/other-healthcare-jobs/494451/HR-Admin-Manager",
       "kind": "page_unavailable"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/cook-jobs/315490/Cook-needed-urgently",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/cook-jobs/315490/Cook-needed-urgently (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.businessghana.com', port=443) at 0x7b125a2f0620>, 'Connection to www.businessghana.com timed out. (connect timeout=10)'))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/account-executive-jobs/494235/Supermarket-Sales-Account-Executive",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/account-executive-jobs/494235/Supermarket-Sales-Account-Executive (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.businessghana.com', port=443) at 0x7b125a6b2b40>, 'Connection to www.businessghana.com timed out. (connect timeout=10)'))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/executive-management-jobs/494844/Senior-Executive-Assistant",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/executive-management-jobs/494844/Senior-Executive-Assistant (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-jobs-/494269/Debt-Collector",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/other-jobs-/494269/Debt-Collector (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/human-resources-manager-jobs/461608/Human-Resource-Manager",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/human-resources-manager-jobs/461608/Human-Resource-Manager (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/human-resources-manager-jobs/494838/HR-Manager",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/human-resources-manager-jobs/494838/HR-Manager (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/494841/Trainee-IT-Field-Engineer",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/it-support-jobs/494841/Trainee-IT-Field-Engineer (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/494842/Data-Entry-Officer",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/it-support-jobs/494842/Data-Entry-Officer (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/marketer-jobs/494648/Marketers-needed-urgently",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/marketer-jobs/494648/Marketers-needed-urgently (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-it-jobs/494839/Videographer-Video-Editor-Digital-Marketing",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/other-it-jobs/494839/Videographer-Video-Editor-Digital-Marketing (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/sales-executive-jobs/494840/Marketing-Sales-Executive",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/sales-executive-jobs/494840/Marketing-Sales-Executive (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/sales-executive-jobs/494642/Sales-and-Marketing-Executive-Accra",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/sales-executive-jobs/494642/Sales-and-Marketing-Executive-Accra (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/sales-representative-jobs/447906/Sales-Marketing-Reps",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/sales-representative-jobs/447906/Sales-Marketing-Reps (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/other-education-jobs/494067/National-Service-NSS-School-Tarkwa-W-R",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/other-education-jobs/494067/National-Service-NSS-School-Tarkwa-W-R (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
+    },
+    {
+      "source": "BusinessGhana",
+      "url": "https://www.businessghana.com/site/jobs/it-support-jobs/438102/Account-Manager-Software-Sales-French-Speaking",
+      "error": "HTTPSConnectionPool(host='www.businessghana.com', port=443): Max retries exceeded with url: /site/jobs/it-support-jobs/438102/Account-Manager-Software-Sales-French-Speaking (Caused by NameResolutionError(\"HTTPSConnection(host='www.businessghana.com', port=443): Failed to resolve 'www.businessghana.com' ([Errno -3] Temporary failure in name resolution)\"))",
+      "kind": "request_failed"
     }
   ],
   "exclusions": [],
-  "finished_at_utc": "2026-11-26T19:41:10.280194+00:00",
+  "finished_at_utc": "2026-11-27T20:16:32.900715+00:00",
   "pagination": [
     {
       "source": "GhanaCurrentJobs",
       "page": 1,
       "url": "https://www.ghanacurrentjobs.com/",
-      "new_unique_links": 16,
-      "total_unique_links": 16,
+      "new_unique_links": 20,
+      "total_unique_links": 20,
       "result": "Continue",
       "downloaded": true
     },
@@ -109,8 +200,8 @@
       "source": "GhanaCurrentJobs",
       "page": 2,
       "url": "https://www.ghanacurrentjobs.com/page/2/",
-      "new_unique_links": 20,
-      "total_unique_links": 36,
+      "new_unique_links": 19,
+      "total_unique_links": 39,
       "result": "Continue",
       "downloaded": true
     },
@@ -119,7 +210,7 @@
       "page": 3,
       "url": "https://www.ghanacurrentjobs.com/page/3/",
       "new_unique_links": 20,
-      "total_unique_links": 56,
+      "total_unique_links": 59,
       "result": "Continue",
       "downloaded": true
     },
@@ -128,7 +219,7 @@
       "page": 4,
       "url": "https://www.ghanacurrentjobs.com/page/4/",
       "new_unique_links": 20,
-      "total_unique_links": 76,
+      "total_unique_links": 79,
       "result": "Continue",
       "downloaded": true
     },
@@ -137,7 +228,7 @@
       "page": 5,
       "url": "https://www.ghanacurrentjobs.com/page/5/",
       "new_unique_links": 19,
-      "total_unique_links": 95,
+      "total_unique_links": 98,
       "result": "Continue",
       "downloaded": true
     },
@@ -146,7 +237,7 @@
       "page": 6,
       "url": "https://www.ghanacurrentjobs.com/page/6/",
       "new_unique_links": 20,
-      "total_unique_links": 115,
+      "total_unique_links": 118,
       "result": "Continue",
       "downloaded": true
     },
@@ -155,7 +246,7 @@
       "page": 7,
       "url": "https://www.ghanacurrentjobs.com/page/7/",
       "new_unique_links": 20,
-      "total_unique_links": 135,
+      "total_unique_links": 138,
       "result": "Continue",
       "downloaded": true
     },
@@ -164,7 +255,7 @@
       "page": 8,
       "url": "https://www.ghanacurrentjobs.com/page/8/",
       "new_unique_links": 20,
-      "total_unique_links": 155,
+      "total_unique_links": 158,
       "result": "Continue",
       "downloaded": true
     },
@@ -173,7 +264,7 @@
       "page": 9,
       "url": "https://www.ghanacurrentjobs.com/page/9/",
       "new_unique_links": 20,
-      "total_unique_links": 175,
+      "total_unique_links": 178,
       "result": "Continue",
       "downloaded": true
     },
@@ -182,7 +273,7 @@
       "page": 10,
       "url": "https://www.ghanacurrentjobs.com/page/10/",
       "new_unique_links": 20,
-      "total_unique_links": 195,
+      "total_unique_links": 198,
       "result": "Page limit reached",
       "downloaded": true
     },
@@ -280,8 +371,8 @@
       "source": "BusinessGhana",
       "page": 1,
       "url": "https://www.businessghana.com/site/jobs",
-      "new_unique_links": 74,
-      "total_unique_links": 74,
+      "new_unique_links": 79,
+      "total_unique_links": 79,
       "result": "Continue",
       "downloaded": true
     },
@@ -290,7 +381,7 @@
       "page": 2,
       "url": "https://www.businessghana.com/site/jobs?page=2",
       "new_unique_links": 44,
-      "total_unique_links": 118,
+      "total_unique_links": 123,
       "result": "Continue",
       "downloaded": true
     },
@@ -298,8 +389,8 @@
       "source": "BusinessGhana",
       "page": 3,
       "url": "https://www.businessghana.com/site/jobs?page=3",
-      "new_unique_links": 46,
-      "total_unique_links": 164,
+      "new_unique_links": 45,
+      "total_unique_links": 168,
       "result": "Continue",
       "downloaded": true
     },
@@ -308,7 +399,7 @@
       "page": 4,
       "url": "https://www.businessghana.com/site/jobs?page=4",
       "new_unique_links": 48,
-      "total_unique_links": 212,
+      "total_unique_links": 216,
       "result": "Continue",
       "downloaded": true
     },
@@ -316,8 +407,8 @@
       "source": "BusinessGhana",
       "page": 5,
       "url": "https://www.businessghana.com/site/jobs?page=5",
-      "new_unique_links": 46,
-      "total_unique_links": 258,
+      "new_unique_links": 49,
+      "total_unique_links": 265,
       "result": "Continue",
       "downloaded": true
     },
@@ -326,7 +417,7 @@
       "page": 6,
       "url": "https://www.businessghana.com/site/jobs?page=6",
       "new_unique_links": 46,
-      "total_unique_links": 304,
+      "total_unique_links": 311,
       "result": "Continue",
       "downloaded": true
     },
@@ -334,8 +425,8 @@
       "source": "BusinessGhana",
       "page": 7,
       "url": "https://www.businessghana.com/site/jobs?page=7",
-      "new_unique_links": 45,
-      "total_unique_links": 349,
+      "new_unique_links": 44,
+      "total_unique_links": 355,
       "result": "Continue",
       "downloaded": true
     },
@@ -344,7 +435,7 @@
       "page": 8,
       "url": "https://www.businessghana.com/site/jobs?page=8",
       "new_unique_links": 46,
-      "total_unique_links": 395,
+      "total_unique_links": 401,
       "result": "Continue",
       "downloaded": true
     },
@@ -352,8 +443,8 @@
       "source": "BusinessGhana",
       "page": 9,
       "url": "https://www.businessghana.com/site/jobs?page=9",
-      "new_unique_links": 45,
-      "total_unique_links": 440,
+      "new_unique_links": 49,
+      "total_unique_links": 450,
       "result": "Continue",
       "downloaded": true
     },
@@ -361,8 +452,8 @@
       "source": "BusinessGhana",
       "page": 10,
       "url": "https://www.businessghana.com/site/jobs?page=10",
-      "new_unique_links": 45,
-      "total_unique_links": 485,
+      "new_unique_links": 46,
+      "total_unique_links": 496,
       "result": "Page limit reached",
       "downloaded": true
     },
